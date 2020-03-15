@@ -10,7 +10,7 @@ RECV_LEN = 10000000
 PORT = 8080
 IP = 'localhost'
 
-GAME_ID = 41
+GAME_ID = 10
 
 player = {
     'id': -1,
@@ -22,6 +22,7 @@ session = {
     'players': [],
     'next_turn': -1
 }
+game_state = {}
 
 # Create socket and connect
 try:
@@ -72,7 +73,7 @@ def handleInit(msg_info):
     # print(msg_info['session'])
     session['start'] = msg_info['session']['start']
     session['fields'] = msg_info['session']['fields']
-    session['players'] = msg_info['session']['start']
+    session['players'] = msg_info['session']['players']
 
 def handleTurn(msg_info):
     session['next_turn'] = msg_info['playerID']
@@ -81,7 +82,7 @@ def handleMessage(msg):
     msg_info = json.loads(msg)
     # TODO: implement switch
     # switcher = {
-    #     u'player': handlePlayer(msg_info)
+    #     'player': handlePlayer(msg_info)
     # }
     # func = switcher.get(msg_info['type'], lambda: 'Invalid message type')
     # return func
@@ -104,6 +105,22 @@ def send(msg):
     time.sleep(1)
     return s.send(msg)
 
+def processInit(session):
+    if session['start'] == -1:
+        return
+    # game_state = {}
+    for value in session['players']:
+        player_id = value['id']
+        game_state[player_id] = {}
+    
+    for key, value in session['fields'].items():
+        if value['player'] is None:
+            continue
+        player_tmp = game_state[value['player']]
+        player_tmp[key] = value['neighbours']
+
+# def getRandomPawn(player_id):
+
 # Login
 username = randomString()
 user = {'username': username, 'gameID': GAME_ID}
@@ -121,9 +138,9 @@ messages = receive()
 if(messages != -1):
     handleMessages(messages)
 
-print('Board state:')
-print(session)
+processInit(session)
 
+# TODO: write logic to receive next turn always
 while(session['next_turn'] == -1):
     messages = receive()
     if(messages != -1):
@@ -145,11 +162,3 @@ while True:
 
     messages = receive()
     handleMessages(messages)
-
-# next_config = json.loads(s.recv(RECV_LEN))
-# next_turn_of_player = json.loads(s.recv(RECV_LEN))
-
-# print('Board state: \n')
-# print(next_config['session'])
-# player_id = next_turn_of_player['playerID']
-# print('Turn of player with id: ' + player_id + '\n')
