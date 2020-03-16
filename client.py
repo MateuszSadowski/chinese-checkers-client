@@ -5,6 +5,8 @@ import string
 import time
 import datetime
 
+import helper
+
 # RECV_LEN = 4096
 RECV_LEN = 10000000
 PORT = 8080
@@ -49,14 +51,6 @@ except socket.error as err:
 #         messages = response.split('\r\n')
 #     return messages
 
-def removeValuesFromList(the_list, val):
-   return [value for value in the_list if value != val]
-
-def randomString(stringLength=10):
-    # Generate a random string of fixed length
-    letters = string.ascii_lowercase
-    return ''.join(random.choice(letters) for i in range(stringLength))
-
 def receive():
     response = s.recv(RECV_LEN)
     if response == '':
@@ -64,7 +58,7 @@ def receive():
         return -1
     # print('-> Received: ' + response + '\n')
     messages = response.split('\r\n')
-    messages = removeValuesFromList(messages, '')
+    messages = helper.removeValuesFromList(messages, '')
     return messages
 
 def handlePlayer(msg_info):
@@ -144,6 +138,7 @@ def processInit(session):
         if value['player'] is None:
             continue
         player_tmp = game_state[value['player']]
+        # TODO: Fix this! Update player pawns after making a move
         player_tmp[key] = value['neighbours']
 
 def getRandomPawn(player_id):
@@ -183,7 +178,7 @@ def getRandomMove(pawn):
 
 
 # Login
-username = randomString()
+username = helper.randomString()
 user = {'username': username, 'gameID': GAME_ID}
 login_msg = json.dumps(user)
 
