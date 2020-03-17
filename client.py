@@ -8,30 +8,45 @@ import datetime
 import game
 import helper
 
-# RECV_LEN = 4096
-GAME_ID = 2
+PORT = 8080
+IP = 'localhost'
+GAME_ID = 27
 
-# Create socket and connect
+# Initialize game
+game = game.Game()
+# TODO: handle case when failed to connect
+game.connect(IP, PORT)
+game.loginAndWaitToStart(helper.randomString(), GAME_ID)
+game.initializeState()
 
+# Strategy functions
+def getRandomPawn():
+    pawns = game.getMyPawns()
+    return random.choice(pawns)
 
-def processInit(session):
-    if session['start'] == -1:
-        return
-    # game_state = {}
-    for value in session['players']:
-        player_id = value['id']
-        game_state[player_id] = {}
-    
-    for key, value in session['fields'].items():
-        if value['player'] is None:
-            continue
-        player_tmp = game_state[value['player']]
-        # TODO: Fix this! Update player pawns after making a move
-        player_tmp[key] = value['neighbours']
+def getRandomMove(pawn):
+    neighbours = game.getFieldNeighbours(pawn)
 
-def getRandomPawn(player_id):
-    pawns = game_state[player_id]
-    return random.choice(list(pawns.keys()))
+    for key, field in neighbours.items():
+        if game.getPawnInField(field) is None:
+            return field
+
+    return -1   # No available moves for this pawn
+
+# Wait for turn or make move
+while not game.isFinished():
+    while not game.isNextTurn():
+        game.receiveAndProcessMessages()
+
+    if game.isMyTurn():
+        print('It\'s my turn!\n')
+        next_move = -1
+        while next_move == -1:
+            pawn = getRandomPawn()
+            next_move = getRandomMove(pawn)
+        game.createAndMakeMove(pawn, next_move)
+
+    game.receiveAndProcessMessages()
 
 # def makeMove(pawn, length, lastField):
 #     neighbours = session['fields'][pawn]['neighbours']
@@ -54,48 +69,3 @@ def getRandomPawn(player_id):
 #                 move = result[0]
 
 #     return (move, longest_move_length)
-
-def getRandomMove(pawn):
-    neighbours = session['fields'][str(pawn)]['neighbours']
-
-    for key, value in neighbours.items():
-        if session['fields'][value]['player'] is None:
-            return value
-    
-    return -1   # No available moves for this pawn
-
-# Initialize
-game = game.Game()
-game.connect('localhost', 8080)
-
-# Login
-game.login(helper.randomString(), GAME_ID)
-
-# Game start
-print('[INFO] Waiting for game to start...\n')
-messages = receiveAndSplitMessages()
-if(messages != -1):
-    handler.handleMessages(messages)
-
-processInit(session)
-
-# Wait for turn or make move
-while True:
-    while(session['next_turn'] == session['last_turn']):
-        messages = receiveAndSplitMessages()
-        if(messages != -1):
-            handler.handleMessages(messages)
-    if player['id'] == session['next_turn']:
-        print('Player[{0}]>> It\'s my turn!'.format(player['id']))
-        time.sleep(3)
-        next_move = -1
-        while next_move == -1:
-            pawn = getRandomPawn(player['id'])
-            next_move = getRandomMove(pawn)
-        move = { 'createdAt': datetime.datetime.now().isoformat() + '+00:00', 'oldFieldID': pawn, 'newFieldID': next_move }
-        move_msg = json.dumps(move)
-        send(move_msg)
-
-    messages = receiveAndSplitMessages()
-    if(messages != -1):
-        handler.handleMessages(messages)

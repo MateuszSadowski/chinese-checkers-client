@@ -1,5 +1,7 @@
 import json
 
+import helper
+
 ID = 'id'
 USERNAME = 'username'
 START = 'start'
@@ -15,12 +17,6 @@ class MessageHandler:
 
     def handleMessage(self, msg, state):
         msg_info = json.loads(msg)
-        # TODO: implement switch
-        # switcher = {
-        #     'player': handlePlayer(msg_info)
-        # }
-        # func = switcher.get(msg_info['type'], lambda: 'Invalid message type')
-        # return func
         msg_type = msg_info['type']
         if msg_type == 'player':
             return self.handlePlayer(msg_info, state)
@@ -33,7 +29,7 @@ class MessageHandler:
         elif msg_type == 'result':
             return self.handleResult(msg_info, state)
         elif msg_type == 'info':
-            return self.handleInfo(msg_info['info'])
+            return self.handleInfo(msg_info['info'], state)
         else:
             print('!!ERROR!! Invalid message type')
         
@@ -59,13 +55,19 @@ class MessageHandler:
         return state
 
     def handleInfo(self, msg_info, state):
-        state['last_turn'] = state['next_turn']
         player = state['player']
+        old_field = str(msg_info['oldFieldID'])
+        new_field = str(msg_info['newFieldID'])
+
+        state['last_turn'] = state['next_turn']
+
+        # Update player's pawns
+        state['pawns'][state['last_turn']] = helper.removeValuesFromList(state['pawns'][state['last_turn']], old_field)
+        state['pawns'][state['last_turn']].append(new_field)
         # Update board info
-        # TODO: update player's pawn list
-        state['fields'][str(msg_info['oldFieldID'])]['player'] = None
-        state['fields'][str(msg_info['newFieldID'])]['player'] = state['last_turn']
-        print('==MOVE-{3}==> Player {0} made a move from {1} to {2}\n'.format(state['last_turn'], msg_info['oldFieldID'], msg_info['newFieldID'], player['total_moves']))
+        state['board'][old_field]['player'] = None
+        state['board'][new_field]['player'] = state['last_turn']
+        print('==MOVE-{3}==> Player {0} made a move from {1} to {2}\n'.format(state['last_turn'], old_field, new_field, player['total_moves']))
         player['total_moves'] += 1
         return state
 
@@ -75,8 +77,11 @@ class MessageHandler:
 
     def handleResult(self, msg_info, state):
         print('==================================================')
-        print('<<RESULT>> Game ended with result:')
-        print('{0} for player {1}'.format(msg_info[RESULT], msg_info[PLAYER_ID]))
+        print('<<RESULT>>')
+        print('Game ended with result: {0}'.format(msg_info[RESULT]))
+        if msg_info[PLAYER_ID] != -1:
+            print('for player {1}'.format(msg_info[PLAYER_ID]))
         print('after {0} moves'.format(state['player']['total_moves']))
         print('==================================================')
+        state['game_finished'] = True
         return state

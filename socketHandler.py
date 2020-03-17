@@ -3,10 +3,8 @@ import time
 import socket
 
 RECV_LEN = 10000000
-PORT = 8080
-IP = 'localhost'
 
-SEND_DELAY = 1
+SEND_DELAY = 3
 EMPTY_RESPONSE_DELAY = 1
 
 class SocketHandler:
