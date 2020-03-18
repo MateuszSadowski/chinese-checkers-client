@@ -8,3 +8,12 @@ def randomString(stringLength=10):
     # Generate a random string of fixed length
     letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for i in range(stringLength))
+
+def getIntegersFromConsole():
+   value = -1
+   while value == -1:
+    try:
+        value = int(input())
+    except:
+        print('Invalid game ID. Please input only integers')
+   return value

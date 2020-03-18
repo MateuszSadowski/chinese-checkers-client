@@ -23,6 +23,9 @@ class Game:
         player_id = self.game_state['player']['id']
         return self.game_state['pawns'][player_id]
 
+    def getAllPawns(self):
+        return self.game_state['pawns']
+
     def getFieldNeighbours(self, field):
         return self.game_state['board'][field]['neighbours']
 
