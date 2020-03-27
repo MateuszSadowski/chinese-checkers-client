@@ -10,7 +10,7 @@ import helper
 
 PORT = 8080
 IP = 'localhost'
-GAME_ID = 27
+GAME_ID = 32
 
 # Initialize game
 game = game.Game()
@@ -24,7 +24,12 @@ def getRandomPawn():
     pawns = game.getMyPawns()
     return random.choice(pawns)
 
-def getRandomMove(pawn):
+def getRandomMove():
+    myPlayerID = game.getMyPlayerID()
+    availableNeighbours,occupiedNeighbours = game.analyzeNeighboursForAllPlayerPawns(myPlayerID)
+    availableBridges = game.allBridges(game.initializeBridge(occupiedNeighbours))
+    possibleMoves = game.allMoves(availableNeighbours, availableBridges, myPlayerID)
+
     neighbours = game.getFieldNeighbours(pawn)
 
     for key, field in neighbours.items():
@@ -32,6 +37,7 @@ def getRandomMove(pawn):
             return field
 
     return -1   # No available moves for this pawn
+
 
 # Wait for turn or make move
 while not game.isFinished():
@@ -43,7 +49,7 @@ while not game.isFinished():
         next_move = -1
         while next_move == -1:
             pawn = getRandomPawn()
-            next_move = getRandomMove(pawn)
+            next_move = getRandomMove()
         game.createAndMakeMove(pawn, next_move)
 
     game.receiveAndProcessMessages()
