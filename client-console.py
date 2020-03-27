@@ -28,6 +28,11 @@ def printAllPawns():
     for key, value in pawns.items():
         print('Player {0} has pawns in {1}'.format(key, value))
 
+def printAllPossibleMoves():
+    possibleMoves = game.allMoves(game.getMyPlayerID())
+    for key, value in possibleMoves.items():
+        print('Pawn {0} can move to {1}'.format(key, value))
+
 # Wait for turn or make move
 while not game.isFinished():
     while not game.isNextTurn():
@@ -36,6 +41,7 @@ while not game.isFinished():
     if game.isMyTurn():
         print('It\'s my turn!\n')
         printAllPawns()
+        printAllPossibleMoves()
         print('Which pawn would you like to move?')
         old_field = helper.getIntegersFromConsole()
         print('Where would you like to move?')
