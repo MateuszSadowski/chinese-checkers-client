@@ -143,6 +143,7 @@ class Game:
     def initializeBridge(self, occupiedNeighbours): # Initialization in order to find all possible bridges
         initialMoves = {}
         for pawn, neighbours in occupiedNeighbours.items():
+            initialMoves[pawn] = []
             if len(neighbours) > 0:
                 tmp = []
                 for direction, neighbour in neighbours.items():
@@ -163,14 +164,13 @@ class Game:
         return nextBridge
 
     def allBridges(self, initialMoves): # Lists of all bridges found, including initial bridges
-        availableBridges = initialMoves.copy()
-        for position in availableBridges:
-            for move in availableBridges[position]:
-                tmp = self.nextBridges(move)
+        for pawn in initialMoves:
+            for possibleMove in initialMoves[pawn]:
+                tmp = self.nextBridges(possibleMove)
                 for i in tmp:
-                    if i not in availableBridges[position]:
-                        availableBridges[position].append(i)
-        return availableBridges
+                    if i not in initialMoves[pawn]:
+                        initialMoves[pawn].append(i)
+        return initialMoves
 
     def allMoves(self, availableNeighbours, availableBridges, playerID): # Lists of all possible moves including direct and indirect (bridge) moves
         possibleMoves = {}
