@@ -172,7 +172,9 @@ class Game:
                         initialMoves[pawn].append(i)
         return initialMoves
 
-    def allMoves(self, availableNeighbours, availableBridges, playerID): # Lists of all possible moves including direct and indirect (bridge) moves
+    def allMoves(self, playerID): # Lists of all possible moves including direct and indirect (bridge) moves
+        availableNeighbours, occupiedNeighbours = self.analyzeNeighboursForAllPlayerPawns(playerID)
+        availableBridges = self.allBridges(self.initializeBridge(occupiedNeighbours))
         possibleMoves = {}
         for pawn in availableNeighbours:
             neighbours = availableNeighbours[pawn].values()

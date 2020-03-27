@@ -10,7 +10,7 @@ import helper
 
 PORT = 8080
 IP = 'localhost'
-GAME_ID = 31
+GAME_ID = 1
 
 # Initialize game
 game = game.Game()
@@ -26,9 +26,7 @@ def getRandomPawn():
 
 def getRandomMove():
     myPlayerID = game.getMyPlayerID()
-    availableNeighbours,occupiedNeighbours = game.analyzeNeighboursForAllPlayerPawns(myPlayerID)
-    availableBridges = game.allBridges(game.initializeBridge(occupiedNeighbours))
-    possibleMoves = game.allMoves(availableNeighbours, availableBridges, myPlayerID)
+    possibleMoves = game.allMoves(myPlayerID)
 
     pawns = list(filter(lambda pawn: len(possibleMoves[pawn]) > 0, possibleMoves.keys())) # Get only pawns that have at least 1 possible move
     if len(pawns) == 0:
