@@ -124,8 +124,8 @@ class Game:
         available = {};
         occupied = {};
         board = self.game_state['board'];
-        for key, neighbour in board[pawn]["neighbours"].items():
-            if board[neighbour]["player"] == None:
+        for key, neighbour in board[pawn]['neighbours'].items():
+            if board[neighbour]['player'] == None:
                 available[key] = neighbour
             else:
                 occupied[key] = neighbour
@@ -134,8 +134,8 @@ class Game:
     def analyzeStep(self, direction, position): # Analyze bridge of occupied neighbour in specified direction
         board = self.game_state['board'];
         try:
-            possibleBridge = board[position]["neighbours"][direction]
-            if board[possibleBridge]["player"] == None:
+            possibleBridge = board[position]['neighbours'][direction]
+            if board[possibleBridge]['player'] == None:
                 return possibleBridge
         except: #Return False if player jumps out of the field
             return None
@@ -156,8 +156,8 @@ class Game:
     def nextBridges(self, occupiedNeigbour): # Step to go from initial bridges the next bridges
         nextBridge = []
         board = self.game_state['board']
-        for direction, nextNeighbour in board[occupiedNeigbour]["neighbours"].items():
-            if board[nextNeighbour]["player"] != None:
+        for direction, nextNeighbour in board[occupiedNeigbour]['neighbours'].items():
+            if board[nextNeighbour]['player'] != None:
                 fieldToJumpTo = self.analyzeStep(direction, nextNeighbour)
                 if fieldToJumpTo != None:
                     nextBridge.append(fieldToJumpTo)
@@ -187,21 +187,4 @@ class Game:
                     goalFields = players[i]['goalFields']
                     if pawn in goalFields:
                         possibleMoves[pawn] = [x for x in possibleMoves[pawn] if x in goalFields]
-        # possibleMoves = {}    
-        # for position in availableNeighbours:
-        #     tmp = []
-        #     for key in availableNeighbours[position]:
-        #         tmp.append(availableNeighbours[position])
-        #     try:
-        #         tmp = tmp + availableBridges[position]
-        #         possibleMoves[position] = tmp
-        #     except:
-        #         possibleMoves[position] = tmp
-        #     # Remove moves outside goal state if already in goal state
-        #     players = self.game_state['players']
-        #     for i in range(len(players)):
-        #         if players[i]['id'] == playerID:
-        #             goalFields = players[i]['goalFields']
-        #             if position in goalFields:
-        #                 possibleMoves[position] = [x for x in possibleMoves[position] if x in goalFields]
         return possibleMoves
