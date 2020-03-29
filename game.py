@@ -10,10 +10,10 @@ class Game:
         self.socketHandler = socketHandler.SocketHandler()
         self.messageHandler = messageHandler.MessageHandler()
         self.game_state = {
-            'player': {},
-            'players': [],
-            'board': {},
-            'pawns': {},
+            'player': {}, # this player
+            'players': [], # info about all players
+            'board': {}, # current state of the game
+            'pawns': {}, # current pawns location for each player
             'next_turn': -1,
             'last_turn': -1,
             'game_finished': False
