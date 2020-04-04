@@ -8,17 +8,19 @@ SEND_DELAY = 3
 EMPTY_RESPONSE_DELAY = 1
 
 class SocketHandler:
-    def __init__(self):  
+    def __init__(self, ip, port):
+        self.ip = ip
+        self.port = port
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             print('[INFO] Socket successfully created\n')
         except socket.error as err:
             print('!!ERROR!! Socket creation failed with error {0}'.format(err))
 
-    def connect(self, ip, port):
+    def connect(self):
         try:
-            self.socket.connect((ip, port))
-            print('[INFO] Socket successfully connected to {0} on port {1}\n'.format(ip, port))
+            self.socket.connect((self.ip, self.port))
+            print('[INFO] Socket successfully connected to {0} on port {1}\n'.format(self.ip, self.port))
         except self.socket.error as err:
             print('!!ERROR!! Socket connection failed with error {0}\n'.format(err))
         

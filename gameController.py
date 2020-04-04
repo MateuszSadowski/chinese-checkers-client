@@ -5,69 +5,80 @@ import helper
 import socketHandler
 import messageHandler
 
-class Game:
-    def __init__(self):  
-        self.socketHandler = socketHandler.SocketHandler()
-        self.messageHandler = messageHandler.MessageHandler()
-        self.game_state = {
-            'player': {}, # this player
-            'players': [], # info about all players
-            'board': {}, # current state of the game
-            'pawns': {}, # current pawns location for each player
-            'next_turn': -1,
-            'last_turn': -1,
-            'game_finished': False
-        }
+class GameController:
+    # Refactor
+    def makeMove(self, state, oldField, newField, playerId):
+        # Update player's pawns
+        state['pawns'][playerId] = helper.removeValuesFromList(state['pawns'][playerId], oldField)
+        state['pawns'][playerId].append(newField)
+        # Update board info
+        state['board'][oldField]['player'] = None
+        state['board'][newField]['player'] = playerId
+        print('==MOVE-{3}==> Player {0} made a move from {1} to {2}\n'.format(playerId, oldField, newField, state['player']['totalMoves']))
+        state['player']['totalMoves'] += 1
+
+        return state
+
+    def nextTurn(self, state, playerId):
+        state['last_turn'] = state['next_turn']
+        state['next_turn'] = playerId
+
+        return state
+
+    def finishGame(self, state):
+        state['game_finished'] = True
+
+        return state
 
     # Getters
-    def getMyPlayerID(self):
-        return self.game_state['player']['id']
+    def isFinished(self, state):
+        return state['game_finished']
 
-    def getMyPawns(self):
+    def getMyPlayerID(self, state):
+        return state['player']['id']
+
+    def getMyPawns(self, state):
         player_id = self.getMyPlayerID()
-        return self.game_state['pawns'][player_id]
+        return state['pawns'][player_id]
 
     def getPlayerPawns(self, player_id):
-        return self.game_state['pawns'][player_id]
+        return state['pawns'][player_id]
 
-    def getAllPawns(self):
-        return self.game_state['pawns']
+    def getAllPawns(self, state):
+        return state['pawns']
 
-    def getCurrentGameState(self):
-        return self.game_state
+    def getCurrentGameState(self, state):
+        return state
 
     def getFieldNeighbours(self, field):
-        return self.game_state['board'][field]['neighbours']
+        return state['board'][field]['neighbours']
 
-    def getPawnInField(self, field):
-        return self.game_state['board'][field]['player']
+    def getPawnInField(self, state, field):
+        return state['board'][field]['player']
 
-    def isNextTurn(self):
-        return self.game_state['next_turn'] != self.game_state['last_turn']
+    def isNextTurn(self, state):
+        return state['next_turn'] != state['last_turn']
 
-    def isMyTurn(self):
-        return self.game_state['next_turn'] == self.game_state['player']['id']
-
-    def isFinished(self):
-        return self.game_state['game_finished']
+    def isMyTurn(self, state):
+        return state['next_turn'] == state['player']['id']
 
     # Initialize
-    def connect(self, ip, port):
-        self.socketHandler.connect(ip, port)
+    # def connect(self, ip, port):
+    #     self.socketHandler.connect(ip, port)
 
-    def loginAndWaitToStart(self, username, game_id):
-        user = {
-            'username': username,
-            'gameID': game_id
-        }
+    # def loginAndWaitToStart(self, username, game_id):
+    #     user = {
+    #         'username': username,
+    #         'gameID': game_id
+    #     }
 
-        login_msg = json.dumps(user)
-        self.socketHandler.send(login_msg)
+    #     login_msg = json.dumps(user)
+    #     self.socketHandler.send(login_msg)
 
-        self.receiveAndProcessMessages()
+    #     self.receiveAndProcessMessages()
 
-        print('[INFO] Waiting for game to start...\n')
-        self.receiveAndProcessMessages()
+    #     print('[INFO] Waiting for game to start...\n')
+    #     self.receiveAndProcessMessages()
 
     def getGoalFields(self, zone_id):
         if zone_id == 0:
@@ -80,37 +91,33 @@ class Game:
         # TODO: return boundary
         return goalFields
 
-    def initializeState(self):
-        if self.game_state['board'] == {}:
+    def initializeState(self, state):
+        if state['board'] == {}:
             print('!!ERROR!! Board info not initialized')
             return
 
-        for player in self.game_state['players']:
+        for player in state['players']:
             player_id = player['id']
             player['goalFields'] = self.getGoalFields(player['zoneID'])
-            self.game_state['pawns'][player_id] = []
+            state['pawns'][player_id] = []
         
-        for key, field in self.game_state['board'].items():
+        for key, field in state['board'].items():
             player_id = field['player']
             if player_id is None:
                 continue
-            self.game_state['pawns'][player_id].append(key)
+            state['pawns'][player_id].append(key)
+
+        return state
 
     # Game
-    def createAndMakeMove(self, oldField, newField):
-        move = { 
-            'createdAt': datetime.datetime.now().isoformat() + '+00:00',
-            'oldFieldID': oldField,
-            'newFieldID': newField
-        }
-        move_msg = json.dumps(move)
-        self.socketHandler.send(move_msg)
-
-    def receiveAndProcessMessages(self):
-        messages = self.socketHandler.receiveAndSplitMessages()
-        if(messages != -1):
-            for msg in messages:
-                self.game_state = self.messageHandler.handleMessage(msg, self.game_state)
+    # def createAndMakeMove(self, oldField, newField):
+    #     move = { 
+    #         'createdAt': datetime.datetime.now().isoformat() + '+00:00',
+    #         'oldFieldID': oldField,
+    #         'newFieldID': newField
+    #     }
+    #     move_msg = json.dumps(move)
+    #     self.socketHandler.send(move_msg)
 
     # Analyze possible moves
     def analyzeNeighboursForAllPlayerPawns(self, game_state, player_id):
@@ -185,7 +192,7 @@ class Game:
             bridges = availableBridges[pawn]
             possibleMoves[pawn] = neighbours + bridges
             # Remove moves outside goal state if already in goal state
-            players = self.game_state['players']
+            players = game_state['players']
             for i in range(len(players)):
                 if players[i]['id'] == playerID:
                     goalFields = players[i]['goalFields']
