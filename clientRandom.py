@@ -14,7 +14,7 @@ import helper
 
 PORT = 8080
 IP = 'localhost'
-GAME_ID = 14
+GAME_ID = 17
 
 # Initialize game
 gameState = gameState.GameState()
@@ -53,11 +53,11 @@ def getRandomMove():
     return oldField, newField
 
 # Wait for turn or make move
-while not gameController.isFinished(gameState.getState()):
-    while not gameController.isNextTurn(gameState.getState()):
+while not gameState.isFinished():
+    while not gameState.isNextTurn():
         messageHandler.receiveAndProcessMessages()
 
-    if gameController.isMyTurn(gameState.getState()):
+    if gameState.isMyTurn():
         print('It\'s my turn!\n')
         oldField, newField = getRandomMove()
         messageDispatcher.sendMove(oldField, newField)

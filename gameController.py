@@ -31,9 +31,6 @@ class GameController:
         return state
 
     # Getters
-    def isFinished(self, state):
-        return state['game_finished']
-
     def getMyPlayerID(self, state):
         return state['player']['id']
 
@@ -55,12 +52,6 @@ class GameController:
 
     def getPawnInField(self, state, field):
         return state['board'][field]['player']
-
-    def isNextTurn(self, state):
-        return state['next_turn'] != state['last_turn']
-
-    def isMyTurn(self, state):
-        return state['next_turn'] == state['player']['id']
 
     # Initialize
     # def connect(self, ip, port):

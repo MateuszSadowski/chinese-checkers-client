@@ -17,3 +17,12 @@ class GameState:
 
     def setState(self, state):
         self.state = state
+
+    def isNextTurn(self):
+        return self.state['next_turn'] != self.state['last_turn']
+
+    def isFinished(self):
+        return self.state['game_finished']
+
+    def isMyTurn(self):
+        return self.state['next_turn'] == self.state['player']['id']
