@@ -78,7 +78,7 @@ class MessageHandler:
         newField = str(msg_info['newFieldID'])
         playerId = currentState['board'][oldField]['player']
         
-        # TODO: might need to do state['last_turn'] = state['next_turn'] here
+        newState = self.gameController.finishTurn(currentState)
         newState = self.gameController.makeMove(currentState, oldField, newField, playerId)
         self.gameState.setState(newState)
 

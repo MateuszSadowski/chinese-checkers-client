@@ -20,8 +20,12 @@ class GameController:
         return state
 
     def nextTurn(self, state, playerId):
-        state['last_turn'] = state['next_turn']
         state['next_turn'] = playerId
+
+        return state
+
+    def finishTurn(self, state):
+        state['last_turn'] = state['next_turn']
 
         return state
 

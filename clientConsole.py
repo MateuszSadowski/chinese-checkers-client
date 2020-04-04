@@ -5,7 +5,11 @@ import string
 import time
 import datetime
 
-import game
+import gameState
+import gameController
+import messageDispatcher
+import messageHandler
+import socketHandler
 import helper
 
 PORT = 8080
@@ -13,42 +17,53 @@ IP = 'localhost'
 
 print('Welcome to ChineseCheckers!')
 print('What is the ID of the game you want to connect to?')
-game_id = helper.getIntegersFromConsole()
+gameId = helper.getIntegersFromConsole()
 
 # Initialize game
-game = game.Game()
+gameState = gameState.GameState()
+gameController = gameController.GameController()
+socketHandler = socketHandler.SocketHandler(IP, PORT)
+messageHandler = messageHandler.MessageHandler(gameState, gameController, socketHandler)
+messageDispatcher = messageDispatcher.MessageDispatcher(gameState, gameController, socketHandler)
+
 # TODO: handle case when failed to connect
-game.connect(IP, PORT)
-game.loginAndWaitToStart(helper.randomString(), game_id)
-game.initializeState()
+username = helper.randomString()
+messageDispatcher.connect()
+messageDispatcher.login(username, gameId)
+
+messageHandler.receiveAndProcessMessages()
+
+print('[INFO] Waiting for game to start...\n')
+messageHandler.receiveAndProcessMessages()
 
 # Strategy functions
 def printAllPawns():
-    pawns = game.getAllPawns()
+    state = gameState.getState()
+    pawns = gameController.getAllPawns(state)
     for key, value in pawns.items():
         print('Player {0} has pawns in {1}'.format(key, value))
 
 def printAllPossibleMoves():
-    myPlayerID = game.getMyPlayerID()
-    currentState = game.getCurrentGameState()
-    possibleMoves = game.allMoves(currentState, myPlayerID)
+    state = gameState.getState()
+    myPlayerID = gameController.getMyPlayerID(state)
+    possibleMoves = gameController.allMoves(state, myPlayerID)
     for key, value in possibleMoves.items():
         print('Pawn {0} can move to {1}'.format(key, value))
 
 # Wait for turn or make move
-while not game.isFinished():
-    while not game.isNextTurn():
-        game.receiveAndProcessMessages()
+while not gameState.isFinished():
+    while not gameState.isNextTurn():
+        messageHandler.receiveAndProcessMessages()
 
-    if game.isMyTurn():
+    if gameState.isMyTurn():
         print('It\'s my turn!\n')
         printAllPawns()
         printAllPossibleMoves()
         # TODO: make it possible to quit game
         print('Which pawn would you like to move?')
-        old_field = helper.getIntegersFromConsole()
+        oldField = helper.getIntegersFromConsole()
         print('Where would you like to move?')
-        new_field = helper.getIntegersFromConsole()
-        game.createAndMakeMove(old_field, new_field)
+        newField = helper.getIntegersFromConsole()
+        messageDispatcher.sendMove(oldField, newField)
 
-    game.receiveAndProcessMessages()
+    messageHandler.receiveAndProcessMessages()

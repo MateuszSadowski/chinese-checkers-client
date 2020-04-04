@@ -2,7 +2,9 @@ import json
 import datetime
 
 class MessageDispatcher:
-    def __init__(self, socketHandler):
+    def __init__(self, gameState, gameController, socketHandler):
+        self.gameState = gameState
+        self.gameController = gameController
         self.socketHandler = socketHandler
 
     def connect(self):
@@ -18,6 +20,9 @@ class MessageDispatcher:
         self.socketHandler.send(login_msg)
 
     def sendMove(self, oldField, newField):
+        state = self.gameState.getState()
+        newState = self.gameController.finishTurn(state)
+        self.gameState.setState(newState)
         move = { 
             'createdAt': datetime.datetime.now().isoformat() + '+00:00',
             'oldFieldID': oldField,

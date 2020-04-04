@@ -14,14 +14,14 @@ import helper
 
 PORT = 8080
 IP = 'localhost'
-GAME_ID = 17
+GAME_ID = 26
 
 # Initialize game
 gameState = gameState.GameState()
 gameController = gameController.GameController()
 socketHandler = socketHandler.SocketHandler(IP, PORT)
 messageHandler = messageHandler.MessageHandler(gameState, gameController, socketHandler)
-messageDispatcher = messageDispatcher.MessageDispatcher(socketHandler)
+messageDispatcher = messageDispatcher.MessageDispatcher(gameState, gameController, socketHandler)
 
 # TODO: handle case when failed to connect
 username = helper.randomString()
