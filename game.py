@@ -33,6 +33,9 @@ class Game:
     def getAllPawns(self):
         return self.game_state['pawns']
 
+    def getCurrentGameState(self):
+        return self.game_state
+
     def getFieldNeighbours(self, field):
         return self.game_state['board'][field]['neighbours']
 
@@ -110,20 +113,20 @@ class Game:
                 self.game_state = self.messageHandler.handleMessage(msg, self.game_state)
 
     # Analyze possible moves
-    def analyzeNeighboursForAllPlayerPawns(self, player_id):
+    def analyzeNeighboursForAllPlayerPawns(self, game_state, player_id):
         availableNeighbours = {}
         occupiedNeighbours = {}
-        for pawn in self.game_state['pawns'][player_id]:
-            available, occupied = self.analyzeNeighboursForPlayerPawn(pawn, player_id)
+        for pawn in game_state['pawns'][player_id]:
+            available, occupied = self.analyzeNeighboursForPlayerPawn(game_state, pawn, player_id)
             availableNeighbours[pawn] = available
             occupiedNeighbours[pawn] = occupied
 
         return availableNeighbours, occupiedNeighbours
 
-    def analyzeNeighboursForPlayerPawn(self, pawn, playerID): #Analyze direct neighbours
+    def analyzeNeighboursForPlayerPawn(self, game_state, pawn, playerID): #Analyze direct neighbours
         available = {};
         occupied = {};
-        board = self.game_state['board'];
+        board = game_state['board'];
         for key, neighbour in board[pawn]['neighbours'].items():
             if board[neighbour]['player'] == None:
                 available[key] = neighbour
@@ -131,8 +134,8 @@ class Game:
                 occupied[key] = neighbour
         return available, occupied
 
-    def analyzeStep(self, direction, position): # Analyze bridge of occupied neighbour in specified direction
-        board = self.game_state['board'];
+    def analyzeStep(self, game_state, direction, position): # Analyze bridge of occupied neighbour in specified direction
+        board = game_state['board'];
         try:
             possibleBridge = board[position]['neighbours'][direction]
             if board[possibleBridge]['player'] == None:
@@ -140,41 +143,42 @@ class Game:
         except: #Return False if player jumps out of the field
             return None
 
-    def initializeBridge(self, occupiedNeighbours): # Initialization in order to find all possible bridges
+    def initializeBridge(self, game_state, occupiedNeighbours): # Initialization in order to find all possible bridges
         initialMoves = {}
         for pawn, neighbours in occupiedNeighbours.items():
             initialMoves[pawn] = []
             if len(neighbours) > 0:
                 tmp = []
                 for direction, neighbour in neighbours.items():
-                    fieldToJumpTo = self.analyzeStep(direction, neighbour)
+                    fieldToJumpTo = self.analyzeStep(game_state, direction, neighbour)
                     if fieldToJumpTo != None:
                         tmp.append(fieldToJumpTo)
                 initialMoves[pawn] = tmp
         return initialMoves
 
-    def nextBridges(self, occupiedNeigbour): # Step to go from initial bridges the next bridges
+    def nextBridges(self, game_state, occupiedNeigbour): # Step to go from initial bridges the next bridges
         nextBridge = []
-        board = self.game_state['board']
+        board = game_state['board']
         for direction, nextNeighbour in board[occupiedNeigbour]['neighbours'].items():
             if board[nextNeighbour]['player'] != None:
-                fieldToJumpTo = self.analyzeStep(direction, nextNeighbour)
+                fieldToJumpTo = self.analyzeStep(game_state, direction, nextNeighbour)
                 if fieldToJumpTo != None:
                     nextBridge.append(fieldToJumpTo)
         return nextBridge
 
-    def allBridges(self, initialMoves): # Lists of all bridges found, including initial bridges
+    def allBridges(self, game_state, initialMoves): # Lists of all bridges found, including initial bridges
         for pawn in initialMoves:
             for possibleMove in initialMoves[pawn]:
-                tmp = self.nextBridges(possibleMove)
+                tmp = self.nextBridges(game_state, possibleMove)
                 for i in tmp:
                     if i not in initialMoves[pawn]:
                         initialMoves[pawn].append(i)
         return initialMoves
 
-    def allMoves(self, playerID): # Lists of all possible moves including direct and indirect (bridge) moves
-        availableNeighbours, occupiedNeighbours = self.analyzeNeighboursForAllPlayerPawns(playerID)
-        availableBridges = self.allBridges(self.initializeBridge(occupiedNeighbours))
+    def allMoves(self, game_state, playerID): # Lists of all possible moves including direct and indirect (bridge) moves
+        availableNeighbours, occupiedNeighbours = self.analyzeNeighboursForAllPlayerPawns(game_state, playerID)
+        initialMoves = self.initializeBridge(game_state, occupiedNeighbours)
+        availableBridges = self.allBridges(game_state, initialMoves)
         possibleMoves = {}
         for pawn in availableNeighbours:
             neighbours = availableNeighbours[pawn].values()

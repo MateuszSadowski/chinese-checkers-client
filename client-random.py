@@ -26,7 +26,8 @@ def getRandomPawn():
 
 def getRandomMove():
     myPlayerID = game.getMyPlayerID()
-    possibleMoves = game.allMoves(myPlayerID)
+    currentState = game.getCurrentGameState()
+    possibleMoves = game.allMoves(currentState, myPlayerID)
 
     pawns = list(filter(lambda pawn: len(possibleMoves[pawn]) > 0, possibleMoves.keys())) # Get only pawns that have at least 1 possible move
     if len(pawns) == 0:

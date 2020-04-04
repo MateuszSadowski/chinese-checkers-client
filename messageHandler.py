@@ -34,6 +34,7 @@ class MessageHandler:
             print('!!ERROR!! Invalid message type')
         
     def handlePlayer(self, msg_info, state):
+        # TODO: game.handlePlayer
         state['player'] = {
             ID: msg_info[ID],
             USERNAME: msg_info[USERNAME],
