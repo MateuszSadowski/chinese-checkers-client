@@ -10,14 +10,14 @@ class MessageDispatcher:
     def connect(self):
         self.socketHandler.connect()
 
-    def login(self, username, game_id):
+    def login(self, username, gameId):
         user = {
             'username': username,
-            'gameID': game_id
+            'gameID': gameId
         }
 
-        login_msg = json.dumps(user)
-        self.socketHandler.send(login_msg)
+        loginMsg = json.dumps(user)
+        self.socketHandler.send(loginMsg)
 
     def sendMove(self, oldField, newField):
         state = self.gameState.getState()
@@ -28,5 +28,5 @@ class MessageDispatcher:
             'oldFieldID': oldField,
             'newFieldID': newField
         }
-        move_msg = json.dumps(move)
-        self.socketHandler.send(move_msg)
+        moveMsg = json.dumps(move)
+        self.socketHandler.send(moveMsg)

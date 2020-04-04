@@ -20,17 +20,17 @@ class GameController:
         return state
 
     def nextTurn(self, state, playerId):
-        state['next_turn'] = playerId
+        state['nextTurn'] = playerId
 
         return state
 
     def finishTurn(self, state):
-        state['last_turn'] = state['next_turn']
+        state['lastTurn'] = state['nextTurn']
 
         return state
 
     def finishGame(self, state):
-        state['game_finished'] = True
+        state['gameFinished'] = True
 
         return state
 
@@ -39,11 +39,11 @@ class GameController:
         return state['player']['id']
 
     def getMyPawns(self, state):
-        player_id = self.getMyPlayerID()
-        return state['pawns'][player_id]
+        playerId = self.getMyPlayerID()
+        return state['pawns'][playerId]
 
-    def getPlayerPawns(self, player_id):
-        return state['pawns'][player_id]
+    def getPlayerPawns(self, playerId):
+        return state['pawns'][playerId]
 
     def getAllPawns(self, state):
         return state['pawns']
@@ -57,29 +57,11 @@ class GameController:
     def getPawnInField(self, state, field):
         return state['board'][field]['player']
 
-    # Initialize
-    # def connect(self, ip, port):
-    #     self.socketHandler.connect(ip, port)
-
-    # def loginAndWaitToStart(self, username, game_id):
-    #     user = {
-    #         'username': username,
-    #         'gameID': game_id
-    #     }
-
-    #     login_msg = json.dumps(user)
-    #     self.socketHandler.send(login_msg)
-
-    #     self.receiveAndProcessMessages()
-
-    #     print('[INFO] Waiting for game to start...\n')
-    #     self.receiveAndProcessMessages()
-
-    def getGoalFields(self, zone_id):
-        if zone_id == 0:
+    def getGoalFields(self, zoneId):
+        if zoneId == 0:
             goalFields = ['91','92','93','94','95','96','97','98','99','100']
             boundary = int(14)
-        elif zone_id == 3:
+        elif zoneId == 3:
             goalFields = ['61','62','63','64','65','66','67','68','69','70']
             boundary = int(4)
 
@@ -92,43 +74,33 @@ class GameController:
             return
 
         for player in state['players']:
-            player_id = player['id']
+            playerId = player['id']
             player['goalFields'] = self.getGoalFields(player['zoneID'])
-            state['pawns'][player_id] = []
+            state['pawns'][playerId] = []
         
         for key, field in state['board'].items():
-            player_id = field['player']
-            if player_id is None:
+            playerId = field['player']
+            if playerId is None:
                 continue
-            state['pawns'][player_id].append(key)
+            state['pawns'][playerId].append(key)
 
         return state
 
-    # Game
-    # def createAndMakeMove(self, oldField, newField):
-    #     move = { 
-    #         'createdAt': datetime.datetime.now().isoformat() + '+00:00',
-    #         'oldFieldID': oldField,
-    #         'newFieldID': newField
-    #     }
-    #     move_msg = json.dumps(move)
-    #     self.socketHandler.send(move_msg)
-
     # Analyze possible moves
-    def analyzeNeighboursForAllPlayerPawns(self, game_state, player_id):
+    def analyzeNeighboursForAllPlayerPawns(self, gameState, playerId):
         availableNeighbours = {}
         occupiedNeighbours = {}
-        for pawn in game_state['pawns'][player_id]:
-            available, occupied = self.analyzeNeighboursForPlayerPawn(game_state, pawn, player_id)
+        for pawn in gameState['pawns'][playerId]:
+            available, occupied = self.analyzeNeighboursForPlayerPawn(gameState, pawn, playerId)
             availableNeighbours[pawn] = available
             occupiedNeighbours[pawn] = occupied
 
         return availableNeighbours, occupiedNeighbours
 
-    def analyzeNeighboursForPlayerPawn(self, game_state, pawn, playerID): #Analyze direct neighbours
+    def analyzeNeighboursForPlayerPawn(self, gameState, pawn, playerID): #Analyze direct neighbours
         available = {};
         occupied = {};
-        board = game_state['board'];
+        board = gameState['board'];
         for key, neighbour in board[pawn]['neighbours'].items():
             if board[neighbour]['player'] == None:
                 available[key] = neighbour
@@ -136,8 +108,8 @@ class GameController:
                 occupied[key] = neighbour
         return available, occupied
 
-    def analyzeStep(self, game_state, direction, position): # Analyze bridge of occupied neighbour in specified direction
-        board = game_state['board'];
+    def analyzeStep(self, gameState, direction, position): # Analyze bridge of occupied neighbour in specified direction
+        board = gameState['board'];
         try:
             possibleBridge = board[position]['neighbours'][direction]
             if board[possibleBridge]['player'] == None:
@@ -145,49 +117,49 @@ class GameController:
         except: #Return False if player jumps out of the field
             return None
 
-    def initializeBridge(self, game_state, occupiedNeighbours): # Initialization in order to find all possible bridges
+    def initializeBridge(self, gameState, occupiedNeighbours): # Initialization in order to find all possible bridges
         initialMoves = {}
         for pawn, neighbours in occupiedNeighbours.items():
             initialMoves[pawn] = []
             if len(neighbours) > 0:
                 tmp = []
                 for direction, neighbour in neighbours.items():
-                    fieldToJumpTo = self.analyzeStep(game_state, direction, neighbour)
+                    fieldToJumpTo = self.analyzeStep(gameState, direction, neighbour)
                     if fieldToJumpTo != None:
                         tmp.append(fieldToJumpTo)
                 initialMoves[pawn] = tmp
         return initialMoves
 
-    def nextBridges(self, game_state, occupiedNeigbour): # Step to go from initial bridges the next bridges
+    def nextBridges(self, gameState, occupiedNeigbour): # Step to go from initial bridges the next bridges
         nextBridge = []
-        board = game_state['board']
+        board = gameState['board']
         for direction, nextNeighbour in board[occupiedNeigbour]['neighbours'].items():
             if board[nextNeighbour]['player'] != None:
-                fieldToJumpTo = self.analyzeStep(game_state, direction, nextNeighbour)
+                fieldToJumpTo = self.analyzeStep(gameState, direction, nextNeighbour)
                 if fieldToJumpTo != None:
                     nextBridge.append(fieldToJumpTo)
         return nextBridge
 
-    def allBridges(self, game_state, initialMoves): # Lists of all bridges found, including initial bridges
+    def allBridges(self, gameState, initialMoves): # Lists of all bridges found, including initial bridges
         for pawn in initialMoves:
             for possibleMove in initialMoves[pawn]:
-                tmp = self.nextBridges(game_state, possibleMove)
+                tmp = self.nextBridges(gameState, possibleMove)
                 for i in tmp:
                     if i not in initialMoves[pawn]:
                         initialMoves[pawn].append(i)
         return initialMoves
 
-    def allMoves(self, game_state, playerID): # Lists of all possible moves including direct and indirect (bridge) moves
-        availableNeighbours, occupiedNeighbours = self.analyzeNeighboursForAllPlayerPawns(game_state, playerID)
-        initialMoves = self.initializeBridge(game_state, occupiedNeighbours)
-        availableBridges = self.allBridges(game_state, initialMoves)
+    def allMoves(self, gameState, playerID): # Lists of all possible moves including direct and indirect (bridge) moves
+        availableNeighbours, occupiedNeighbours = self.analyzeNeighboursForAllPlayerPawns(gameState, playerID)
+        initialMoves = self.initializeBridge(gameState, occupiedNeighbours)
+        availableBridges = self.allBridges(gameState, initialMoves)
         possibleMoves = {}
         for pawn in availableNeighbours:
             neighbours = availableNeighbours[pawn].values()
             bridges = availableBridges[pawn]
             possibleMoves[pawn] = neighbours + bridges
             # Remove moves outside goal state if already in goal state
-            players = game_state['players']
+            players = gameState['players']
             for i in range(len(players)):
                 if players[i]['id'] == playerID:
                     goalFields = players[i]['goalFields']

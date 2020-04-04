@@ -3,20 +3,6 @@ import json
 import gameState
 import helper
 
-ID = 'id'
-USERNAME = 'username'
-START = 'start'
-FIELDS = 'fields'
-PLAYERS = 'players'
-PLAYER = 'player'
-SESSION = 'session'
-PLAYER_ID = 'playerID'
-CAUSE = 'cause'
-RESULT = 'result'
-BOARD = 'board'
-TOTAL_MOVES = 'totalMoves'
-TYPE = 'type'
-
 class MessageHandler:
     def __init__(self, gameState, gameController, socketHandler):
         self.gameState = gameState
@@ -30,68 +16,68 @@ class MessageHandler:
                 self.handleMessage(msg)
 
     def handleMessage(self, msg):
-        msg_info = json.loads(msg)
-        msg_type = msg_info['type']
-        if msg_type == PLAYER:
-            self.handlePlayer(msg_info)
-        elif msg_type == 'init':
-            self.handleInit(msg_info)
-        elif msg_type == 'turn':
-            self.handleTurn(msg_info)
-        elif msg_type == 'error':
-            self.handleError(msg_info)
-        elif msg_type == 'result':
-            self.handleResult(msg_info)
-        elif msg_type == 'info':
-            self.handleInfo(msg_info['info'])
+        msgInfo = json.loads(msg)
+        msgType = msgInfo['type']
+        if msgType == 'player':
+            self.handlePlayer(msgInfo)
+        elif msgType == 'init':
+            self.handleInit(msgInfo)
+        elif msgType == 'turn':
+            self.handleTurn(msgInfo)
+        elif msgType == 'error':
+            self.handleError(msgInfo)
+        elif msgType == 'result':
+            self.handleResult(msgInfo)
+        elif msgType == 'info':
+            self.handleInfo(msgInfo['info'])
         else:
             print('!!ERROR!! Invalid message type')
         
-    def handlePlayer(self, msg_info):
+    def handlePlayer(self, msgInfo):
         currentState = self.gameState.getState()
-        currentState[PLAYER] = {
-            ID: msg_info[ID],
-            USERNAME: msg_info[USERNAME],
-            TOTAL_MOVES: 0
+        currentState['player'] = {
+            'id': msgInfo['id'],
+            'username': msgInfo['username'],
+            'totalMoves': 0
         }
         self.gameState.setState(currentState)
-        print('[INFO] Player logged in with ID: {0} and username: {1}\n'.format(currentState[PLAYER][ID], currentState[PLAYER][USERNAME]))
+        print('[INFO] Player logged in with ID: {0} and username: {1}\n'.format(currentState['player']['id'], currentState['player']['username']))
 
-    def handleInit(self, msg_info):
+    def handleInit(self, msgInfo):
         currentState = self.gameState.getState()
-        session_info = msg_info[SESSION];
-        currentState[BOARD] = session_info[FIELDS]
-        currentState[PLAYERS] = session_info[PLAYERS]
+        sessionInfo = msgInfo['session'];
+        currentState['board'] = sessionInfo['fields']
+        currentState['players'] = sessionInfo['players']
         newState = self.gameController.initializeState(currentState)
         self.gameState.setState(newState)
         print('[INFO] Game starts!\n')
 
-    def handleTurn(self, msg_info):
+    def handleTurn(self, msgInfo):
         currentState = self.gameState.getState()
-        newState = self.gameController.nextTurn(currentState, msg_info['playerID'])
+        newState = self.gameController.nextTurn(currentState, msgInfo['playerID'])
         self.gameState.setState(newState)
-        print('((TURN)) Turn of player with id: {0}\n'.format(newState['next_turn']))
+        print('((TURN)) Turn of player with id: {0}\n'.format(newState['nextTurn']))
 
-    def handleInfo(self, msg_info):
+    def handleInfo(self, msgInfo):
         currentState = self.gameState.getState()
-        oldField = str(msg_info['oldFieldID'])
-        newField = str(msg_info['newFieldID'])
+        oldField = str(msgInfo['oldFieldID'])
+        newField = str(msgInfo['newFieldID'])
         playerId = currentState['board'][oldField]['player']
         
         newState = self.gameController.finishTurn(currentState)
         newState = self.gameController.makeMove(currentState, oldField, newField, playerId)
         self.gameState.setState(newState)
 
-    def handleError(self, msg_info):
-        print(msg_info[CAUSE])
+    def handleError(self, msgInfo):
+        print(msgInfo['cause'])
 
-    def handleResult(self, msg_info):
+    def handleResult(self, msgInfo):
         currentState = self.gameState.getState()
         print('==================================================')
         print('<<RESULT>>')
-        print('Game ended with result: {0}'.format(msg_info[RESULT]))
-        if msg_info[PLAYER_ID] != -1:
-            print('for player {1}'.format(msg_info[PLAYER_ID]))
+        print('Game ended with result: {0}'.format(msgInfo['result']))
+        if msgInfo['playerID'] != -1:
+            print('for player {1}'.format(msgInfo['playerID']))
         print('after {0} moves'.format(currentState['player']['totalMoves']))
         print('==================================================')
         newState = self.gameController.finishGame(currentState)

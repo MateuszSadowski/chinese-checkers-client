@@ -14,7 +14,7 @@ import helper
 
 PORT = 8080
 IP = 'localhost'
-GAME_ID = 26
+GAME_ID = 28
 
 # Initialize game
 gameState = gameState.GameState()

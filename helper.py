@@ -1,8 +1,8 @@
 import string
 import random
 
-def removeValuesFromList(the_list, val):
-   return [value for value in the_list if value != val]
+def removeValuesFromList(theList, val):
+   return [value for value in theList if value != val]
 
 def randomString(stringLength=10):
     # Generate a random string of fixed length
