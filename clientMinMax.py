@@ -15,7 +15,7 @@ import helper
 
 PORT = 8080
 IP = 'localhost'
-GAME_ID = 33
+GAME_ID = 50
 M_CONST = 10*10
 MAX_DEPTH = 3
 
@@ -105,19 +105,29 @@ horizontalPosition = [9,8,7,6,5,
                       12.5,12,
                       13]
 
-def Evaluation(state): # player 2 maximizes evaluation, player 1 minimizes evaluation
+def evaluate(state): # player 2 maximizes evaluation, player 1 minimizes evaluation
     currentPositions = state['pawns']
     players = state['players']
     verticalDistance = []
     horizontalDistance = []
     centerline = int(7)
-    for i in range(len(players)):
-        playerID = players[i]['id']
-        boundary = players[i]['boundary']
+
+    # TODO: refactor this
+    myPlayerId = gameController.getMyPlayerID(state)
+    sortedPlayers = [None, None]
+    for player in players:
+        if player['id'] == myPlayerId:
+            sortedPlayers[0] = player
+        else:
+            sortedPlayers[1] = player
+
+    for i in range(len(sortedPlayers)):
+        playerID = sortedPlayers[i]['id']
+        boundary = sortedPlayers[i]['boundary']
         vertDist = 0
         horDist = 0
         for pawn in currentPositions[playerID]:
-            if pawn not in players[i]['goalFields']:
+            if pawn not in sortedPlayers[i]['goalFields']:
                 vertDist += abs(boundary - verticalPosition[int(pawn)])
                 horDist += abs(centerline - horizontalPosition[int(pawn)])
         verticalDistance.append(vertDist)
@@ -154,7 +164,7 @@ def MiniMax(state,depth,alpha,beta,maximizingPlayersTurn): # MiniMax algorithm
     minPlayer = gameController.getOpponentID(state)
 
     if depth == 0 or GameOver(state,maxPlayer) or GameOver(state,minPlayer):
-        return Evaluation(state)
+        return evaluate(state)
 
     if maximizingPlayersTurn:
         # availableNeighbours,occupiedNeighbours = AnalyzeNeighbours(currentPositions,currentField,maxPlayer)
