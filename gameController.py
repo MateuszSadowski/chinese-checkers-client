@@ -14,7 +14,6 @@ class GameController:
         # Update board info
         state['board'][oldField]['player'] = None
         state['board'][newField]['player'] = playerId
-        print('==MOVE-{3}==> Player {0} made a move from {1} to {2}\n'.format(playerId, oldField, newField, state['player']['totalMoves']))
         state['player']['totalMoves'] += 1
 
         return state
@@ -38,6 +37,13 @@ class GameController:
     def getMyPlayerID(self, state):
         return state['player']['id']
 
+    def getOpponentID(self, state):
+        # TODO: refactor
+        myPlayerId = state['player']['id']
+        for player in state['players']:
+            if player['id'] != myPlayerId:
+                return player['id']
+
     def getMyPawns(self, state):
         playerId = self.getMyPlayerID()
         return state['pawns'][playerId]
@@ -57,7 +63,7 @@ class GameController:
     def getPawnInField(self, state, field):
         return state['board'][field]['player']
 
-    def getGoalFields(self, zoneId):
+    def getGoalFieldsAndBoundary(self, zoneId):
         if zoneId == 0:
             goalFields = ['91','92','93','94','95','96','97','98','99','100']
             boundary = int(14)
@@ -65,8 +71,7 @@ class GameController:
             goalFields = ['61','62','63','64','65','66','67','68','69','70']
             boundary = int(4)
 
-        # TODO: return boundary
-        return goalFields
+        return goalFields, boundary
 
     def initializeState(self, state):
         if state['board'] == {}:
@@ -75,7 +80,7 @@ class GameController:
 
         for player in state['players']:
             playerId = player['id']
-            player['goalFields'] = self.getGoalFields(player['zoneID'])
+            player['goalFields'], player['boundary'] = self.getGoalFieldsAndBoundary(player['zoneID'])
             state['pawns'][playerId] = []
         
         for key, field in state['board'].items():

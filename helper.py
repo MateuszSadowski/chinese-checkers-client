@@ -22,3 +22,15 @@ def mergeDicts(dict1, dict2):
     merged = dict1.copy()   # start with x's keys and values
     merged.update(dict2)    # modifies z with y's keys and values & returns None
     return merged
+
+def maxes(a, key=None):
+    if key is None:
+        key = lambda x: x
+    m, max_list = key(a[0]), []
+    for s in a:
+        k = key(s)
+        if k > m:
+            m, max_list = k, [s]
+        elif k == m:
+            max_list.append(s)
+    return m, max_list

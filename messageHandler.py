@@ -66,6 +66,7 @@ class MessageHandler:
         
         newState = self.gameController.finishTurn(currentState)
         newState = self.gameController.makeMove(currentState, oldField, newField, playerId)
+        print('==MOVE-{3}==> Player {0} made a move from {1} to {2}\n'.format(playerId, oldField, newField, currentState['player']['totalMoves']))
         self.gameState.setState(newState)
 
     def handleError(self, msgInfo):
