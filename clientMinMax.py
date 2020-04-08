@@ -35,32 +35,25 @@ messageHandler.receiveAndProcessMessages()
 def evaluate(state): # player 2 maximizes evaluation, player 1 minimizes evaluation
     currentPositions = state['pawns']
     players = state['players']
-    verticalDistance = []
-    horizontalDistance = []
     centerline = int(7)
 
-    # TODO: refactor this
-    myPlayerId = gameController.getMyPlayerID(state)
-    sortedPlayers = [None, None]
     for player in players:
-        if player['id'] == myPlayerId:
-            sortedPlayers[0] = player
-        else:
-            sortedPlayers[1] = player
-
-    for i in range(len(sortedPlayers)):
-        playerID = sortedPlayers[i]['id']
-        boundary = sortedPlayers[i]['boundary']
+        playerID = player['id']
+        boundary = player['boundary']
         vertDist = 0
         horDist = 0
         for pawn in currentPositions[playerID]:
-            if pawn not in sortedPlayers[i]['goalFields']:
+            if pawn not in player['goalFields']:
                 vertDist += abs(boundary - const.VERT_POS[int(pawn)])
                 horDist += abs(centerline - const.HOR_POS[int(pawn)])
-        verticalDistance.append(vertDist)
-        horizontalDistance.append(horDist)
-    evaluation = (verticalDistance[1] - verticalDistance[0]) + (horizontalDistance[1] - horizontalDistance[0])
-    return evaluation
+        if playerID == gameController.getMyPlayerID(state):
+            maxPlayerVertDist = vertDist
+            maxPlayerHorDist = horDist
+        else:
+            minPlayerVertDist = vertDist
+            minPlayerHorDist = horDist
+
+    return (minPlayerVertDist - maxPlayerVertDist) + (minPlayerHorDist - maxPlayerHorDist)
 
 def GameOver(state,playerID):
     currentField = state['board']

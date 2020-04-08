@@ -1,7 +1,7 @@
 # Connection
 PORT = 8080
 IP = 'localhost'
-GAME_ID = 51
+GAME_ID = 58
 
 # Minmax
 M_CONST = 10*10
