@@ -104,19 +104,47 @@ def minMax(state,depth,alpha,beta,maximizingPlayersTurn): # MinMax algorithm
         bestEval = const.M_CONST
 
     possibleMoves = gameController.allMoves(state, playerId)
-    for pawn,move in ((p,i) for p in possibleMoves for i in possibleMoves[p]):
-        newState = copy.deepcopy(state)
-        newState = gameController.makeMove(newState, pawn, move, playerId)
-        evaluation = minMax(newState, depth - 1, alpha, beta, not maximizingPlayersTurn)
 
-        if maximizingPlayersTurn:
-            if const.MAX_DEPTH == depth and evaluation >= bestEval:
-                bestMaxMove.append((pawn, move, evaluation))
+    # Evaluate first level
+    # TODO: refactor
+    if depth == const.MAX_DEPTH and maximizingPlayersTurn:
+        sortedMoves = []
+        for pawn,move in ((p,i) for p in possibleMoves for i in possibleMoves[p]):
+            newState = copy.deepcopy(state)
+            newState = gameController.makeMove(newState, pawn, move, playerId)
+            sortedMoves.append((evaluate(newState), pawn, move))
+        sortedMoves.sort(reverse = True)
+        possibleMoves = list(map(lambda x : (x[1], x[2]), sortedMoves))
 
-        bestEval, alpha, beta = updateEvaluation(maximizingPlayersTurn, bestEval, evaluation, alpha, beta)
+        for possibleMove in possibleMoves:
+            pawn = possibleMove[0]
+            move = possibleMove[1]
+            newState = copy.deepcopy(state)
+            newState = gameController.makeMove(newState, pawn, move, playerId)
+            evaluation = minMax(newState, depth - 1, alpha, beta, not maximizingPlayersTurn)
 
-        if beta <= alpha:
-            break
+            if maximizingPlayersTurn:
+                if const.MAX_DEPTH == depth and evaluation >= bestEval:
+                    bestMaxMove.append((pawn, move, evaluation))
+
+            bestEval, alpha, beta = updateEvaluation(maximizingPlayersTurn, bestEval, evaluation, alpha, beta)
+
+            if beta <= alpha:
+                break
+    else:
+        for pawn,move in ((p,i) for p in possibleMoves for i in possibleMoves[p]):
+            newState = copy.deepcopy(state)
+            newState = gameController.makeMove(newState, pawn, move, playerId)
+            evaluation = minMax(newState, depth - 1, alpha, beta, not maximizingPlayersTurn)
+
+            if maximizingPlayersTurn:
+                if const.MAX_DEPTH == depth and evaluation >= bestEval:
+                    bestMaxMove.append((pawn, move, evaluation))
+
+            bestEval, alpha, beta = updateEvaluation(maximizingPlayersTurn, bestEval, evaluation, alpha, beta)
+
+            if beta <= alpha:
+                break
 
     return bestEval
 
