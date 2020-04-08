@@ -14,7 +14,11 @@ class GameController:
         # Update board info
         state['board'][oldField]['player'] = None
         state['board'][newField]['player'] = playerId
-        state['player']['totalMoves'] += 1
+
+        return state
+
+    def incrementTotalMoves(self, state, playerId):
+        state['totalMoves'][playerId] += 1
 
         return state
 
@@ -102,7 +106,7 @@ class GameController:
 
         return availableNeighbours, occupiedNeighbours
 
-    def analyzeNeighboursForPlayerPawn(self, gameState, pawn, playerID): #Analyze direct neighbours
+    def analyzeNeighboursForPlayerPawn(self, gameState, pawn, playerID): # Analyze direct neighbours
         available = {};
         occupied = {};
         board = gameState['board'];
@@ -162,7 +166,9 @@ class GameController:
         for pawn in availableNeighbours:
             neighbours = availableNeighbours[pawn].values()
             bridges = availableBridges[pawn]
-            possibleMoves[pawn] = neighbours + bridges
+            total = neighbours + bridges
+            # possibleMoves[pawn] = total.reverse()
+            possibleMoves[pawn] = total
             # Remove moves outside goal state if already in goal state
             players = gameState['players']
             for i in range(len(players)):

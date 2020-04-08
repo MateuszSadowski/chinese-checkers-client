@@ -37,8 +37,7 @@ class MessageHandler:
         currentState = self.gameState.getState()
         currentState['player'] = {
             'id': msgInfo['id'],
-            'username': msgInfo['username'],
-            'totalMoves': 0
+            'username': msgInfo['username']
         }
         self.gameState.setState(currentState)
         print('[INFO] Player logged in with ID: {0} and username: {1}\n'.format(currentState['player']['id'], currentState['player']['username']))
@@ -47,6 +46,9 @@ class MessageHandler:
         currentState = self.gameState.getState()
         sessionInfo = msgInfo['session'];
         currentState['board'] = sessionInfo['fields']
+        for player in sessionInfo['players']:
+            playerId = player['id']
+            currentState['totalMoves'][playerId] = 0
         currentState['players'] = sessionInfo['players']
         newState = self.gameController.initializeState(currentState)
         self.gameState.setState(newState)
@@ -65,8 +67,10 @@ class MessageHandler:
         playerId = currentState['board'][oldField]['player']
         
         newState = self.gameController.finishTurn(currentState)
-        newState = self.gameController.makeMove(currentState, oldField, newField, playerId)
-        print('==MOVE-{3}==> Player {0} made a move from {1} to {2}\n'.format(playerId, oldField, newField, currentState['player']['totalMoves']))
+        newState = self.gameController.makeMove(newState, oldField, newField, playerId)
+        newState = self.gameController.incrementTotalMoves(newState, playerId)
+        totalPlayerMoves = newState['totalMoves'][playerId]
+        print('==MOVE-{3}==> Player {0} made a move from {1} to {2}\n'.format(playerId, oldField, newField, totalPlayerMoves))
         self.gameState.setState(newState)
 
     def handleError(self, msgInfo):
@@ -79,6 +83,6 @@ class MessageHandler:
         print('Game ended with result: {0}'.format(msgInfo['result']))
         if msgInfo['playerID'] != -1:
             print('for player {1}'.format(msgInfo['playerID']))
-        print('after {0} moves'.format(currentState['player']['totalMoves']))
+        print('after {0} moves'.format(currentState['totalMoves'][msgInfo['playerID']]))
         print('==================================================')
         newState = self.gameController.finishGame(currentState)

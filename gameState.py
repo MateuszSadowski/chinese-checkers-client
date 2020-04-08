@@ -7,6 +7,7 @@ class GameState:
             'players': [], # info about all players
             'board': {}, # current state of the game
             'pawns': {}, # current pawns' locations for each player
+            'totalMoves': {}, # total number of moves for each player
             'nextTurn': -1, # player id
             'lastTurn': -1, # player id 
             'gameFinished': False
