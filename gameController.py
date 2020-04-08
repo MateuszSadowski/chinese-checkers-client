@@ -167,7 +167,7 @@ class GameController:
             neighbours = availableNeighbours[pawn].values()
             bridges = availableBridges[pawn]
             total = neighbours + bridges
-            # possibleMoves[pawn] = total.reverse()
+            total.reverse()
             possibleMoves[pawn] = total
             # Remove moves outside goal state if already in goal state
             players = gameState['players']
