@@ -11,22 +11,19 @@ import messageDispatcher
 import messageHandler
 import socketHandler
 import helper
-
-PORT = 8080
-IP = 'localhost'
-GAME_ID = 28
+import constants as const
 
 # Initialize game
 gameState = gameState.GameState()
 gameController = gameController.GameController()
-socketHandler = socketHandler.SocketHandler(IP, PORT)
+socketHandler = socketHandler.SocketHandler(const.IP, const.PORT)
 messageHandler = messageHandler.MessageHandler(gameState, gameController, socketHandler)
 messageDispatcher = messageDispatcher.MessageDispatcher(gameState, gameController, socketHandler)
 
 # TODO: handle case when failed to connect
 username = helper.randomString()
 messageDispatcher.connect()
-messageDispatcher.login(username, GAME_ID)
+messageDispatcher.login(username, const.GAME_ID)
 
 messageHandler.receiveAndProcessMessages()
 

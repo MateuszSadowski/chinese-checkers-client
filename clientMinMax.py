@@ -12,24 +12,19 @@ import messageDispatcher
 import messageHandler
 import socketHandler
 import helper
-
-PORT = 8080
-IP = 'localhost'
-GAME_ID = 50
-M_CONST = 10*10
-MAX_DEPTH = 3
+import constants as const
 
 # Initialize game
 gameState = gameState.GameState()
 gameController = gameController.GameController()
-socketHandler = socketHandler.SocketHandler(IP, PORT)
+socketHandler = socketHandler.SocketHandler(const.IP, const.PORT)
 messageHandler = messageHandler.MessageHandler(gameState, gameController, socketHandler)
 messageDispatcher = messageDispatcher.MessageDispatcher(gameState, gameController, socketHandler)
 
 # TODO: handle case when failed to connect
 username = helper.randomString()
 messageDispatcher.connect()
-messageDispatcher.login(username, GAME_ID)
+messageDispatcher.login(username, const.GAME_ID)
 
 messageHandler.receiveAndProcessMessages()
 
@@ -37,74 +32,6 @@ print('[INFO] Waiting for game to start...\n')
 messageHandler.receiveAndProcessMessages()
 
 # Strategy functions
-verticalPosition = [5,5,5,5,5,
-                    6,6,6,6,6,6,
-                    7,7,7,7,7,7,7,
-                    8,8,8,8,8,8,8,8,
-                    9,9,9,9,9,9,9,9,9,
-                    10,10,10,10,10,10,10,10,
-                    11,11,11,11,11,11,11,
-                    12,12,12,12,12,12,
-                    13,13,13,13,13,
-                    4,4,4,4,
-                    3,3,3,
-                    2,2,
-                    1,
-                    5,6,7,8,
-                    5,6,7,
-                    5,6,
-                    5,
-                    10,11,12,13,
-                    11,12,13,
-                    12,13,
-                    13,
-                    14,14,14,14,
-                    15,15,15,
-                    16,16,
-                    17,
-                    13,12,11,10,
-                    13,12,11,
-                    13,12,
-                    13,
-                    8,7,6,5,
-                    7,6,5,
-                    6,5,
-                    5]
-
-horizontalPosition = [9,8,7,6,5,
-                      9.5,8.5,7.5,6.5,5.5,4.5,
-                      10,9,8,7,6,5,4,
-                      10.5,9.5,8.5,7.5,6.5,5.5,4.5,3.5,
-                      11,10,9,8,7,6,5,4,3,
-                      10.5,9.5,8.5,7.5,6.5,5.5,4.5,3.5,
-                      10,9,8,7,6,5,4,
-                      9.5,8.5,7.5,6.5,5.5,4.5,
-                      9,8,7,6,5,
-                      8.5,7.5,6.5,5.5,
-                      8,7,6,
-                      7.5,6.5,
-                      7,                    
-                      4,3.5,3,2.5,
-                      3,2.5,2,
-                      2,1.5,
-                      1,
-                      2.5,3,3.5,4,
-                      2,2.5,3,
-                      1.5,2,
-                      1,
-                      5.5,6.5,7.5,8.5,
-                      6,7,8,
-                      6.5,7.5,
-                      7,
-                      10,10.5,11,11.5,
-                      11,11.5,12,
-                      12,12.5,
-                      13,
-                      11.5,11,10.5,10,
-                      12,11.5,11,
-                      12.5,12,
-                      13]
-
 def evaluate(state): # player 2 maximizes evaluation, player 1 minimizes evaluation
     currentPositions = state['pawns']
     players = state['players']
@@ -128,8 +55,8 @@ def evaluate(state): # player 2 maximizes evaluation, player 1 minimizes evaluat
         horDist = 0
         for pawn in currentPositions[playerID]:
             if pawn not in sortedPlayers[i]['goalFields']:
-                vertDist += abs(boundary - verticalPosition[int(pawn)])
-                horDist += abs(centerline - horizontalPosition[int(pawn)])
+                vertDist += abs(boundary - const.VERT_POS[int(pawn)])
+                horDist += abs(centerline - const.HOR_POS[int(pawn)])
         verticalDistance.append(vertDist)
         horizontalDistance.append(horDist)
     evaluation = (verticalDistance[1] - verticalDistance[0]) + (horizontalDistance[1] - horizontalDistance[0])
@@ -171,7 +98,7 @@ def MiniMax(state,depth,alpha,beta,maximizingPlayersTurn): # MiniMax algorithm
         # availableBridges = AllBridges(InitializeBridge(occupiedNeighbours))
         # possibleMoves = CombineMoves(availableNeighbours, availableBridges, maxPlayer)
         possibleMoves = gameController.allMoves(state, maxPlayer)
-        MaxEvaluation = -M_CONST
+        MaxEvaluation = -const.M_CONST
         for pawn,move in ((p,i) for p in possibleMoves for i in possibleMoves[p]):
             newState = copy.deepcopy(state)
             # newField = copy.deepcopy(currentField)
@@ -181,7 +108,7 @@ def MiniMax(state,depth,alpha,beta,maximizingPlayersTurn): # MiniMax algorithm
             newState = gameController.makeMove(newState, pawn, move, maxPlayer)
             # UpdateField(newField,newPositions,info)
             evaluation = MiniMax(newState,depth - 1,alpha,beta,False)
-            if MAX_DEPTH == depth and evaluation >= MaxEvaluation:
+            if const.MAX_DEPTH == depth and evaluation >= MaxEvaluation:
                 bestMaxMove.append((pawn,move,evaluation))
             MaxEvaluation = max(MaxEvaluation, evaluation)
             alpha = max(alpha,MaxEvaluation)
@@ -194,7 +121,7 @@ def MiniMax(state,depth,alpha,beta,maximizingPlayersTurn): # MiniMax algorithm
         # availableBridges = AllBridges(InitializeBridge(occupiedNeighbours))
         # possibleMoves = CombineMoves(availableNeighbours, availableBridges, minPlayer)
         possibleMoves = gameController.allMoves(state, minPlayer)
-        MinEvaluation = M_CONST
+        MinEvaluation = const.M_CONST
         for pawn,move in ((p,i) for p in possibleMoves for i in possibleMoves[p]):
             newState = copy.deepcopy(state)
             # newField = copy.deepcopy(currentField)
@@ -204,7 +131,7 @@ def MiniMax(state,depth,alpha,beta,maximizingPlayersTurn): # MiniMax algorithm
             newState = gameController.makeMove(newState, pawn, move, minPlayer)
             # UpdateField(newField,newPositions,info)
             evaluation = MiniMax(newState,depth - 1,alpha,beta,True)
-            if MAX_DEPTH == depth and evaluation <= MinEvaluation:
+            if const.MAX_DEPTH == depth and evaluation <= MinEvaluation:
                 bestMinMove.append((pawn,move,evaluation))
             MinEvaluation = min(MinEvaluation, evaluation)
             beta = min(beta,MinEvaluation)
@@ -217,7 +144,7 @@ def getRandomBestMove(bestMaxMove, bestMinMove):
     
     print('Calculating MinMax...')
     startTime = time.time()
-    MiniMax(state, MAX_DEPTH, -M_CONST, M_CONST, True)
+    MiniMax(state, const.MAX_DEPTH, -const.M_CONST, const.M_CONST, True)
     endTime = time.time()
     print('Calculated in ' + str(endTime - startTime) + ' seconds')
 
@@ -240,7 +167,7 @@ def getBestMove(bestMaxMove, bestMinMove):
     
     print('Calculating MinMax...')
     startTime = time.time()
-    MiniMax(state, MAX_DEPTH, -M_CONST, M_CONST, True)
+    MiniMax(state, const.MAX_DEPTH, -const.M_CONST, const.M_CONST, True)
     endTime = time.time()
     print('Calculated in ' + str(endTime - startTime) + ' seconds')
 
