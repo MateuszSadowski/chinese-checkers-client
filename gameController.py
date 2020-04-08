@@ -66,10 +66,10 @@ class GameController:
     def getGoalFieldsAndBoundary(self, zoneId):
         if zoneId == 0:
             goalFields = ['91','92','93','94','95','96','97','98','99','100']
-            boundary = int(14)
+            boundary = int(17)
         elif zoneId == 3:
             goalFields = ['61','62','63','64','65','66','67','68','69','70']
-            boundary = int(4)
+            boundary = int(1)
 
         return goalFields, boundary
 
