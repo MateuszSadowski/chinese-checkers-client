@@ -55,7 +55,7 @@ def evaluate(state): # player 2 maximizes evaluation, player 1 minimizes evaluat
 
     return (minPlayerVertDist - maxPlayerVertDist) + (minPlayerHorDist - maxPlayerHorDist)
 
-def GameOver(state,playerID):
+def gameOver(state,playerID):
     currentField = state['board']
     players = state['players']
     for i in range(len(players)):
@@ -75,7 +75,6 @@ def GameOver(state,playerID):
         return False
 
 bestMaxMove = []
-bestMinMove = []
 
 def updateEvaluation(maximizingPlayersTurn, bestEval, currEval, alpha, beta):
     if maximizingPlayersTurn:
@@ -95,7 +94,7 @@ def minMax(state,depth,alpha,beta,maximizingPlayersTurn): # MinMax algorithm
 
     # TODO: most often the game is over, bc in the previous move the opponent won the game
     # can it be that we won the game bc of the previous move of the opponent?
-    if depth == 0 or GameOver(state,maxPlayer) or GameOver(state,minPlayer):
+    if depth == 0 or gameOver(state,maxPlayer) or gameOver(state,minPlayer):
         return evaluate(state)
 
     if maximizingPlayersTurn:
@@ -122,7 +121,7 @@ def minMax(state,depth,alpha,beta,maximizingPlayersTurn): # MinMax algorithm
 
     return bestEval
 
-def getRandomBestMove(bestMaxMove, bestMinMove):
+def getRandomBestMove(bestMaxMove):
     state = gameState.getState()
     
     print('Calculating MinMax...')
@@ -145,7 +144,7 @@ def printAllPawns():
     for key, value in pawns.items():
         print('Player {0} has pawns in {1}'.format(key, value))
 
-def getBestMove(bestMaxMove, bestMinMove):
+def getBestMove(bestMaxMove):
     state = gameState.getState()
     
     print('Calculating MinMax...')
@@ -161,6 +160,8 @@ def getBestMove(bestMaxMove, bestMinMove):
     oldField = move[0]
     newField = move[1]
 
+    bestMaxMove = [] # reset
+
     return oldField, newField
 
 # Wait for turn or make move
@@ -171,9 +172,7 @@ while not gameState.isFinished():
     if gameState.isMyTurn():
         print('It\'s my turn!\n')
         printAllPawns()
-        oldField, newField = getBestMove(bestMaxMove, bestMinMove)
-        bestMaxMove = []
-        bestMinMove = []
+        oldField, newField = getBestMove(bestMaxMove)
         messageDispatcher.sendMove(oldField, newField)
 
     messageHandler.receiveAndProcessMessages()
