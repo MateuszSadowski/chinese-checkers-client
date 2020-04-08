@@ -32,6 +32,8 @@ print('[INFO] Waiting for game to start...\n')
 messageHandler.receiveAndProcessMessages()
 
 # Strategy functions
+bestMaxMove = []
+
 def evaluate(state): # player 2 maximizes evaluation, player 1 minimizes evaluation
     currentPositions = state['pawns']
     players = state['players']
@@ -58,23 +60,18 @@ def evaluate(state): # player 2 maximizes evaluation, player 1 minimizes evaluat
 def gameOver(state,playerID):
     currentField = state['board']
     players = state['players']
-    for i in range(len(players)):
-        if players[i]["id"] == playerID:
+    for player in players:
+        if player["id"] == playerID:
             count = int(0) 
-            player_in_goalState = False
-            for key in players[i]["goalFields"]:
+            playerInGoalState = False
+            for key in player["goalFields"]:
                 if currentField[key]["player"] != None:
                     count += 1
                 
                 if currentField[key]["player"] == playerID:
-                    player_in_goalState = True
+                    playerInGoalState = True
     
-    if count == 10 and player_in_goalState == True:
-        return True
-    else:
-        return False
-
-bestMaxMove = []
+    return count == 10 and playerInGoalState
 
 def updateEvaluation(maximizingPlayersTurn, bestEval, currEval, alpha, beta):
     if maximizingPlayersTurn:
