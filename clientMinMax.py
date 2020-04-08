@@ -5,6 +5,7 @@ import string
 import time
 import datetime
 import copy
+import numpy as np
 
 import gameState
 import gameController
@@ -33,6 +34,7 @@ messageHandler.receiveAndProcessMessages()
 
 # Strategy functions
 bestMaxMove = []
+calculationTimes = []
 
 def evaluate(state): # player 2 maximizes evaluation, player 1 minimizes evaluation
     currentPositions = state['pawns']
@@ -124,8 +126,10 @@ def getRandomBestMove(bestMaxMove):
     print('Calculating MinMax...')
     startTime = time.time()
     minMax(state, const.MAX_DEPTH, -const.M_CONST, const.M_CONST, True)
-    endTime = time.time()
-    print('Calculated in ' + str(endTime - startTime) + ' seconds')
+    calculationTime = time.time() - startTime
+    print('Calculated in: ' + str(round(calculationTime, 2)) + ' seconds')
+    calculationTimes.append(calculationTime)
+    print('Average calculation time so far:' + str(round(mean(calculationTimes), 2)))
 
     if len(bestMaxMove) == 0:
         print('!!ERROR!! No possible moves for player: ' + str(gameController.getMyPlayerID(state)))
@@ -147,8 +151,10 @@ def getBestMove(bestMaxMove):
     print('Calculating MinMax...')
     startTime = time.time()
     minMax(state, const.MAX_DEPTH, -const.M_CONST, const.M_CONST, True)
-    endTime = time.time()
-    print('Calculated in ' + str(endTime - startTime) + ' seconds')
+    calculationTime = time.time() - startTime
+    print('Calculated in: ' + str(round(calculationTime, 2)) + ' seconds')
+    calculationTimes.append(calculationTime)
+    print('Average calculation time so far: ' + str(round(np.mean(calculationTimes), 2)) + ' seconds\n')
 
     if len(bestMaxMove) == 0:
         print('!!ERROR!! No possible moves for player: ' + str(gameController.getMyPlayerID(state)))
