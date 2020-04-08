@@ -77,67 +77,57 @@ def GameOver(state,playerID):
 bestMaxMove = []
 bestMinMove = []
 
-# currentField == board
-# currentPositions == pawns
-def MiniMax(state,depth,alpha,beta,maximizingPlayersTurn): # MiniMax algorithm
+def updateEvaluation(maximizingPlayersTurn, bestEval, currEval, alpha, beta):
+    if maximizingPlayersTurn:
+        bestEval = max(bestEval, currEval)
+        alpha = max(alpha, bestEval)
+    else:
+        bestEval = min(bestEval, currEval)
+        beta = min(beta, bestEval)
+
+    return bestEval, alpha, beta
+
+# currentField <==> board
+# currentPositions <==> pawns
+def minMax(state,depth,alpha,beta,maximizingPlayersTurn): # MinMax algorithm
     maxPlayer = gameController.getMyPlayerID(state)
     minPlayer = gameController.getOpponentID(state)
 
+    # TODO: most often the game is over, bc in the previous move the opponent won the game
+    # can it be that we won the game bc of the previous move of the opponent?
     if depth == 0 or GameOver(state,maxPlayer) or GameOver(state,minPlayer):
         return evaluate(state)
 
     if maximizingPlayersTurn:
-        # availableNeighbours,occupiedNeighbours = AnalyzeNeighbours(currentPositions,currentField,maxPlayer)
-        # availableBridges = AllBridges(InitializeBridge(occupiedNeighbours))
-        # possibleMoves = CombineMoves(availableNeighbours, availableBridges, maxPlayer)
-        possibleMoves = gameController.allMoves(state, maxPlayer)
-        MaxEvaluation = -const.M_CONST
-        for pawn,move in ((p,i) for p in possibleMoves for i in possibleMoves[p]):
-            newState = copy.deepcopy(state)
-            # newField = copy.deepcopy(currentField)
-            # newPositions = copy.deepcopy(currentPositions)
-            # print(depth,': from ',pawn,' to ',move)
-            # info = {'createdAt':None,'newFieldID':int(move),'oldFieldID':int(pawn)}
-            newState = gameController.makeMove(newState, pawn, move, maxPlayer)
-            # UpdateField(newField,newPositions,info)
-            evaluation = MiniMax(newState,depth - 1,alpha,beta,False)
-            if const.MAX_DEPTH == depth and evaluation >= MaxEvaluation:
-                bestMaxMove.append((pawn,move,evaluation))
-            MaxEvaluation = max(MaxEvaluation, evaluation)
-            alpha = max(alpha,MaxEvaluation)
-            if beta <= alpha:
-                break
-        return MaxEvaluation
-    
+        playerId = maxPlayer
+        bestEval = -const.M_CONST
     else:
-        # availableNeighbours,occupiedNeighbours = AnalyzeNeighbours(currentPositions,currentField,minPlayer)
-        # availableBridges = AllBridges(InitializeBridge(occupiedNeighbours))
-        # possibleMoves = CombineMoves(availableNeighbours, availableBridges, minPlayer)
-        possibleMoves = gameController.allMoves(state, minPlayer)
-        MinEvaluation = const.M_CONST
-        for pawn,move in ((p,i) for p in possibleMoves for i in possibleMoves[p]):
-            newState = copy.deepcopy(state)
-            # newField = copy.deepcopy(currentField)
-            # newPositions = copy.deepcopy(currentPositions)
-            # print(depth,': from ',pawn,' to ',move)
-            # info = {'createdAt':None,'newFieldID':int(move),'oldFieldID':int(pawn)}
-            newState = gameController.makeMove(newState, pawn, move, minPlayer)
-            # UpdateField(newField,newPositions,info)
-            evaluation = MiniMax(newState,depth - 1,alpha,beta,True)
-            if const.MAX_DEPTH == depth and evaluation <= MinEvaluation:
-                bestMinMove.append((pawn,move,evaluation))
-            MinEvaluation = min(MinEvaluation, evaluation)
-            beta = min(beta,MinEvaluation)
-            if beta <= alpha:
-                break
-        return MinEvaluation
+        playerId = minPlayer
+        bestEval = const.M_CONST
+
+    possibleMoves = gameController.allMoves(state, playerId)
+    for pawn,move in ((p,i) for p in possibleMoves for i in possibleMoves[p]):
+        newState = copy.deepcopy(state)
+        newState = gameController.makeMove(newState, pawn, move, playerId)
+        evaluation = minMax(newState, depth - 1, alpha, beta, not maximizingPlayersTurn)
+
+        if maximizingPlayersTurn:
+            if const.MAX_DEPTH == depth and evaluation >= bestEval:
+                bestMaxMove.append((pawn, move, evaluation))
+
+        bestEval, alpha, beta = updateEvaluation(maximizingPlayersTurn, bestEval, evaluation, alpha, beta)
+
+        if beta <= alpha:
+            break
+
+    return bestEval
 
 def getRandomBestMove(bestMaxMove, bestMinMove):
     state = gameState.getState()
     
     print('Calculating MinMax...')
     startTime = time.time()
-    MiniMax(state, const.MAX_DEPTH, -const.M_CONST, const.M_CONST, True)
+    minMax(state, const.MAX_DEPTH, -const.M_CONST, const.M_CONST, True)
     endTime = time.time()
     print('Calculated in ' + str(endTime - startTime) + ' seconds')
 
@@ -160,7 +150,7 @@ def getBestMove(bestMaxMove, bestMinMove):
     
     print('Calculating MinMax...')
     startTime = time.time()
-    MiniMax(state, const.MAX_DEPTH, -const.M_CONST, const.M_CONST, True)
+    minMax(state, const.MAX_DEPTH, -const.M_CONST, const.M_CONST, True)
     endTime = time.time()
     print('Calculated in ' + str(endTime - startTime) + ' seconds')
 
