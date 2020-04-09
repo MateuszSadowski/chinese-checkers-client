@@ -191,8 +191,6 @@ def getBestMove(bestMaxMove):
     oldField = move[0]
     newField = move[1]
 
-    bestMaxMove = [] # reset
-
     return oldField, newField
 
 # Wait for turn or make move
@@ -204,6 +202,7 @@ while not gameState.isFinished():
         print('It\'s my turn!\n')
         printAllPawns()
         oldField, newField = getBestMove(bestMaxMove)
+        bestMaxMove = [] # reset
         messageDispatcher.sendMove(oldField, newField)
 
     messageHandler.receiveAndProcessMessages()
