@@ -64,7 +64,7 @@ def evaluate(state): # player 2 maximizes evaluation, player 1 minimizes evaluat
             minPlayerVertDist = vertDist
             minPlayerHorDist = horDist
 
-    return (0.9 * (minPlayerVertDist - maxPlayerVertDist) + 0.1 * (minPlayerHorDist - maxPlayerHorDist))
+    return (0.6 * (minPlayerVertDist - maxPlayerVertDist) + 0.4 * (minPlayerHorDist - maxPlayerHorDist))
 
 def gameOver(state,playerID):
     currentField = state['board']
@@ -139,7 +139,7 @@ def minMax(state,depth,alpha,beta,maximizingPlayersTurn): # MinMax algorithm
 
             bestEval, alpha, beta = updateEvaluation(maximizingPlayersTurn, bestEval, evaluation, alpha, beta)
 
-            if beta <= alpha:
+            if beta < alpha:
                 break
     else:
         for pawn,move in ((p,i) for p in possibleMoves for i in possibleMoves[p]):
@@ -154,7 +154,7 @@ def minMax(state,depth,alpha,beta,maximizingPlayersTurn): # MinMax algorithm
 
             bestEval, alpha, beta = updateEvaluation(maximizingPlayersTurn, bestEval, evaluation, alpha, beta)
 
-            if beta <= alpha:
+            if beta < alpha:
                 break
 
     return bestEval
