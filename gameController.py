@@ -177,7 +177,7 @@ class GameController:
                     if pawn in goalFields:
                         possibleMoves[pawn] = [x for x in possibleMoves[pawn] if x in goalFields]
         return possibleMoves
-
+        
     # Visualization
     def drawField(self, state, number):
         board = state['board']
@@ -239,7 +239,7 @@ class GameController:
         print(self.drawField(state,None)+self.drawField(state,'mid')+self.drawField(state,None)+self.drawField(state,'mid')+self.drawField(state,34)+self.drawField(state,'mid')+self.drawField(state,33)+self.drawField(state,'mid')+self.drawField(state,32)+self.drawField(state,'mid')+self.drawField(state,31)+self.drawField(state,'mid')+self.drawField(state,30)+self.drawField(state,'mid')+self.drawField(state,29)+self.drawField(state,'mid')+self.drawField(state,28)+self.drawField(state,'mid')+self.drawField(state,27)+self.drawField(state,'mid')+self.drawField(state,26))
         print("")
         print("")
-        print(self.drawField(state,'start')+self.drawField(state,None)+self.drawField(state,'mid')+self.drawField(state,81)+self.drawField(state,'mid')+self.drawField(state,42)+self.drawField(state,'mid')+self.drawField(state,41)+self.drawField(state,'mid')+self.drawField(state,40)+self.drawField(state,'mid')+self.drawField(state,39)+self.drawField(state,'mid')+self.drawField(state,38)+self.drawField(state,'mid')+self.drawField(state,37)+self.drawField(state,'mid')+self.drawField(state,36)+self.drawField(state,'mid')+self.drawField(state,35)+self.drawField(state,'mid')+self.drawField(state,114))
+        print(self.drawField(state,'start')+self.drawField(state,None)+self.drawField(state,'mid')+self.drawField(state,81)+self.drawField(state,'mid')+self.drawField(state,42)+self.drawField(state,'mid')+self.drawField(state,41)+self.drawField(state,'mid')+self.drawField(state,40)+self.drawField(state,'mid')+self.drawField(state,39)+self.drawField(state,'mid')+self.drawField(state,38)+self.drawField(state,'mid')+self.drawField(state,37)+self.drawField(state,'mid')+self.drawField(state,36)+self.drawField(state,'mid')+self.drawField(state,35)+self.drawField(state,'mid')+self.drawField(state,104))
         print("")
         print("")
         print(self.drawField(state,None)+self.drawField(state,'mid')+self.drawField(state,85)+self.drawField(state,'mid')+self.drawField(state,82)+self.drawField(state,'mid')+self.drawField(state,49)+self.drawField(state,'mid')+self.drawField(state,48)+self.drawField(state,'mid')+self.drawField(state,47)+self.drawField(state,'mid')+self.drawField(state,46)+self.drawField(state,'mid')+self.drawField(state,45)+self.drawField(state,'mid')+self.drawField(state,44)+self.drawField(state,'mid')+self.drawField(state,43)+self.drawField(state,'mid')+self.drawField(state,103)+self.drawField(state,'mid')+self.drawField(state,107))
