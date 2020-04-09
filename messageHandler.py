@@ -83,6 +83,6 @@ class MessageHandler:
         print('Game ended with result: {0}'.format(msgInfo['result']))
         if msgInfo['playerID'] != -1:
             print('for player {1}'.format(msgInfo['playerID']))
-        print('after {0} moves'.format(currentState['totalMoves'][msgInfo['playerID']]))
+            print('after {0} moves'.format(currentState['totalMoves'][msgInfo['playerID']]))
         print('==================================================')
         newState = self.gameController.finishGame(currentState)
