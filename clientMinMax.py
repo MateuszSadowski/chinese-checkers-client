@@ -38,6 +38,10 @@ messageHandler.receiveAndProcessMessages()
 # Strategy functions
 bestMaxMove = []
 calculationTimes = []
+nodesEvaluated = 0
+sumNodesEvaluated = 0
+averageNodesEvaluated = 0
+mainLoopIterations = 0
 
 def evaluate(state): # player 2 maximizes evaluation, player 1 minimizes evaluation
     currentPositions = state['pawns']
@@ -60,7 +64,7 @@ def evaluate(state): # player 2 maximizes evaluation, player 1 minimizes evaluat
             minPlayerVertDist = vertDist
             minPlayerHorDist = horDist
 
-    return (minPlayerVertDist - maxPlayerVertDist) + (minPlayerHorDist - maxPlayerHorDist)
+    return (0.9 * (minPlayerVertDist - maxPlayerVertDist) + 0.1 * (minPlayerHorDist - maxPlayerHorDist))
 
 def gameOver(state,playerID):
     currentField = state['board']
@@ -91,6 +95,7 @@ def updateEvaluation(maximizingPlayersTurn, bestEval, currEval, alpha, beta):
 # currentField <==> board
 # currentPositions <==> pawns
 def minMax(state,depth,alpha,beta,maximizingPlayersTurn): # MinMax algorithm
+    global nodesEvaluated
     maxPlayer = gameController.getMyPlayerID(state)
     minPlayer = gameController.getOpponentID(state)
 
@@ -115,6 +120,7 @@ def minMax(state,depth,alpha,beta,maximizingPlayersTurn): # MinMax algorithm
         for pawn,move in ((p,i) for p in possibleMoves for i in possibleMoves[p]):
             newState = copy.deepcopy(state)
             newState = gameController.makeMove(newState, pawn, move, playerId)
+            nodesEvaluated += 1
             sortedMoves.append((evaluate(newState), pawn, move))
         sortedMoves.sort(reverse = True)
         possibleMoves = list(map(lambda x : (x[1], x[2]), sortedMoves))
@@ -124,6 +130,7 @@ def minMax(state,depth,alpha,beta,maximizingPlayersTurn): # MinMax algorithm
             move = possibleMove[1]
             newState = copy.deepcopy(state)
             newState = gameController.makeMove(newState, pawn, move, playerId)
+            nodesEvaluated += 1
             evaluation = minMax(newState, depth - 1, alpha, beta, not maximizingPlayersTurn)
 
             if maximizingPlayersTurn:
@@ -138,6 +145,7 @@ def minMax(state,depth,alpha,beta,maximizingPlayersTurn): # MinMax algorithm
         for pawn,move in ((p,i) for p in possibleMoves for i in possibleMoves[p]):
             newState = copy.deepcopy(state)
             newState = gameController.makeMove(newState, pawn, move, playerId)
+            nodesEvaluated += 1
             evaluation = minMax(newState, depth - 1, alpha, beta, not maximizingPlayersTurn)
 
             if maximizingPlayersTurn:
@@ -204,6 +212,7 @@ def printPossibleMoves(bestMaxMove):
 
 # Wait for turn or make move
 while not gameState.isFinished():
+    mainLoopIterations += 1
     while not gameState.isNextTurn():
         messageHandler.receiveAndProcessMessages()
 
@@ -212,8 +221,13 @@ while not gameState.isFinished():
         # printAllPawns()
         gameController.printBoard(gameState.getState())
         oldField, newField = getBestMove(bestMaxMove)
+        print('Evaluated {0} moves'.format(nodesEvaluated))
         printPossibleMoves(bestMaxMove)
         bestMaxMove = [] # reset
+        sumNodesEvaluated += nodesEvaluated
+        nodesEvaluated = 0
+        averageNodesEvaluated = sumNodesEvaluated / mainLoopIterations
+        print('Average number of evaluated {0} moves so far'.format(averageNodesEvaluated))
         messageDispatcher.sendMove(oldField, newField)
 
     messageHandler.receiveAndProcessMessages()
