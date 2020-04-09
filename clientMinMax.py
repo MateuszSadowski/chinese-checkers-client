@@ -15,6 +15,9 @@ import socketHandler
 import helper
 import constants as const
 
+print('Specify minmax search depth:\n')
+MAX_DEPTH = helper.getIntegersFromConsole()
+
 # Initialize game
 gameState = gameState.GameState()
 gameController = gameController.GameController()
@@ -107,7 +110,7 @@ def minMax(state,depth,alpha,beta,maximizingPlayersTurn): # MinMax algorithm
 
     # Evaluate first level
     # TODO: refactor
-    if depth == const.MAX_DEPTH and maximizingPlayersTurn:
+    if depth == MAX_DEPTH and maximizingPlayersTurn:
         sortedMoves = []
         for pawn,move in ((p,i) for p in possibleMoves for i in possibleMoves[p]):
             newState = copy.deepcopy(state)
@@ -124,7 +127,7 @@ def minMax(state,depth,alpha,beta,maximizingPlayersTurn): # MinMax algorithm
             evaluation = minMax(newState, depth - 1, alpha, beta, not maximizingPlayersTurn)
 
             if maximizingPlayersTurn:
-                if const.MAX_DEPTH == depth and evaluation >= bestEval:
+                if MAX_DEPTH == depth and evaluation >= bestEval:
                     bestMaxMove.append((pawn, move, evaluation))
 
             bestEval, alpha, beta = updateEvaluation(maximizingPlayersTurn, bestEval, evaluation, alpha, beta)
@@ -138,7 +141,7 @@ def minMax(state,depth,alpha,beta,maximizingPlayersTurn): # MinMax algorithm
             evaluation = minMax(newState, depth - 1, alpha, beta, not maximizingPlayersTurn)
 
             if maximizingPlayersTurn:
-                if const.MAX_DEPTH == depth and evaluation >= bestEval:
+                if MAX_DEPTH == depth and evaluation >= bestEval:
                     bestMaxMove.append((pawn, move, evaluation))
 
             bestEval, alpha, beta = updateEvaluation(maximizingPlayersTurn, bestEval, evaluation, alpha, beta)
@@ -153,7 +156,7 @@ def getRandomBestMove(bestMaxMove):
     
     print('Calculating MinMax...')
     startTime = time.time()
-    minMax(state, const.MAX_DEPTH, -const.M_CONST, const.M_CONST, True)
+    minMax(state, MAX_DEPTH, -const.M_CONST, const.M_CONST, True)
     calculationTime = time.time() - startTime
     print('Calculated in: ' + str(round(calculationTime, 2)) + ' seconds')
     calculationTimes.append(calculationTime)
@@ -178,7 +181,7 @@ def getBestMove(bestMaxMove):
     
     print('Calculating MinMax...')
     startTime = time.time()
-    minMax(state, const.MAX_DEPTH, -const.M_CONST, const.M_CONST, True)
+    minMax(state, MAX_DEPTH, -const.M_CONST, const.M_CONST, True)
     calculationTime = time.time() - startTime
     print('Calculated in: ' + str(round(calculationTime, 2)) + ' seconds')
     calculationTimes.append(calculationTime)
@@ -193,6 +196,12 @@ def getBestMove(bestMaxMove):
 
     return oldField, newField
 
+def printPossibleMoves(bestMaxMove):
+    print('Current evaluation: {0}'.format(evaluate(gameState.getState())))
+    print('Possible moves:')
+    for move in bestMaxMove:
+        print('Pawn {0} to {1} evluated as {2}'.format(move[0], move[1], move[2]))
+
 # Wait for turn or make move
 while not gameState.isFinished():
     while not gameState.isNextTurn():
@@ -203,6 +212,7 @@ while not gameState.isFinished():
         # printAllPawns()
         gameController.printBoard(gameState.getState())
         oldField, newField = getBestMove(bestMaxMove)
+        printPossibleMoves(bestMaxMove)
         bestMaxMove = [] # reset
         messageDispatcher.sendMove(oldField, newField)
 
