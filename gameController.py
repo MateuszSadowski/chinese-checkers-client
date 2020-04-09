@@ -164,7 +164,7 @@ class GameController:
         availableBridges = self.allBridges(gameState, initialMoves)
         possibleMoves = {}
         for pawn in availableNeighbours:
-            neighbours = availableNeighbours[pawn].values()
+            neighbours = list(availableNeighbours[pawn].values())
             bridges = availableBridges[pawn]
             total = neighbours + bridges
             total.reverse()

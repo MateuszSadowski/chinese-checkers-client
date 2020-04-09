@@ -33,6 +33,7 @@ class SocketHandler:
 
     def receiveAndSplitMessages(self):
         response = self.socket.recv(RECV_LEN)
+        response = response.decode()
         if response == '':
             print('[INFO] Received an empty reponse\n')
             time.sleep(EMPTY_RESPONSE_DELAY)
@@ -44,4 +45,4 @@ class SocketHandler:
     def send(self, msg):
         print('[INFO] Sending: ' + msg + '\n')
         time.sleep(SEND_DELAY)
-        return self.socket.send(msg)
+        return self.socket.send(msg.encode())
