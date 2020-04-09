@@ -56,6 +56,7 @@ while not gameState.isFinished():
 
     if gameState.isMyTurn():
         print('It\'s my turn!\n')
+        gameController.printBoard(gameState.getState())
         oldField, newField = getRandomMove()
         messageDispatcher.sendMove(oldField, newField)
 

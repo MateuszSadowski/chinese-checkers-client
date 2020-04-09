@@ -88,7 +88,8 @@ while not gameState.isFinished():
 
     if gameState.isMyTurn():
         print('It\'s my turn!\n')
-        printAllPawns()
+        # printAllPawns()
+        gameController.printBoard(gameState.getState())
         printAllPossibleMoves()
         # TODO: make it possible to quit game
         print('Which pawn would you like to move?')
