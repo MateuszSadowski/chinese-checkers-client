@@ -201,6 +201,7 @@ def getBestMove(bestMaxMove):
     print('Average calculation time so far: ' + str(round(np.mean(calculationTimes), 2)) + ' seconds')
     print('Max calculation time so far: ' + str(round(np.max(calculationTimes), 2)) + ' seconds')
     print('Min calculation time so far: ' + str(round(np.min(calculationTimes), 2)) + ' seconds\n')
+    print('Total calculation time so far: ' + str(round(np.sum(calculationTimes), 2)) + ' seconds\n')
 
     print('No. of evaluated moves: {0}'.format(nodesEvaluated))
     allNodesEvaluated.append(nodesEvaluated)
@@ -208,6 +209,7 @@ def getBestMove(bestMaxMove):
     print('Average no. of evaluated moves so far: {0}'.format(round(np.mean(allNodesEvaluated), 0)))
     print('Max no. of evaluated moves so far: {0}'.format(np.max(allNodesEvaluated)))
     print('Min no. of evaluated moves so far: {0}'.format(np.min(allNodesEvaluated)))
+    print('Total no. of evaluated moves so far: {0}'.format(np.sum(allNodesEvaluated)))
 
     if len(bestMaxMove) == 0:
         print('!!ERROR!! No possible moves for player: ' + str(gameController.getMyPlayerID(state)))
