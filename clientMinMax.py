@@ -53,6 +53,7 @@ def evaluate(state): # player 2 maximizes evaluation, player 1 minimizes evaluat
         boundary = player['boundary']
         vertDist = 0
         horDist = 0
+        endGame = 0
         for pawn in currentPositions[playerID]:
             if pawn not in player['goalFields']:
                 vertDist += abs(boundary - const.VERT_POS[int(pawn)])
@@ -60,11 +61,15 @@ def evaluate(state): # player 2 maximizes evaluation, player 1 minimizes evaluat
         if playerID == gameController.getMyPlayerID(state):
             maxPlayerVertDist = vertDist
             maxPlayerHorDist = horDist
+            if gameOver(state, playerID):
+                endGame = 50
         else:
             minPlayerVertDist = vertDist
             minPlayerHorDist = horDist
+            if gameOver(state, playerID):
+                endGame = -50
 
-    return (0.6 * (minPlayerVertDist - maxPlayerVertDist) + 0.4 * (minPlayerHorDist - maxPlayerHorDist))
+    return (0.6 * (minPlayerVertDist - maxPlayerVertDist) + 0.4 * (minPlayerHorDist - maxPlayerHorDist)) + endGame
 
 def gameOver(state,playerID):
     currentField = state['board']
