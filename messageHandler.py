@@ -11,9 +11,13 @@ class MessageHandler:
 
     def receiveAndProcessMessages(self):
         messages = self.socketHandler.receiveAndSplitMessages()
-        if(messages != -1):
+        if messages != -1:
             for msg in messages:
                 self.handleMessage(msg)
+        else:
+            currentState = self.gameState.getState()
+            newState = self.gameController.finishGame(currentState)
+            self.gameState.setState(newState)
 
     def handleMessage(self, msg):
         msgInfo = json.loads(msg)

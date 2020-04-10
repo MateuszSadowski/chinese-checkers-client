@@ -51,13 +51,14 @@ def getRandomMove():
 
 # Wait for turn or make move
 while not gameState.isFinished():
-    while not gameState.isNextTurn():
+    while not gameState.isNextTurn() and not gameState.isFinished():
         messageHandler.receiveAndProcessMessages()
 
-    if gameState.isMyTurn():
-        print('It\'s my turn!\n')
-        gameController.printBoard(gameState.getState())
-        oldField, newField = getRandomMove()
-        messageDispatcher.sendMove(oldField, newField)
+    if not gameState.isFinished():
+        if gameState.isMyTurn():
+            print('It\'s my turn!\n')
+            gameController.printBoard(gameState.getState())
+            oldField, newField = getRandomMove()
+            messageDispatcher.sendMove(oldField, newField)
 
-    messageHandler.receiveAndProcessMessages()
+        messageHandler.receiveAndProcessMessages()

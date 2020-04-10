@@ -6,6 +6,7 @@ import time
 import datetime
 import copy
 import numpy as np
+import csv
 
 import gameState
 import gameController
@@ -200,7 +201,7 @@ def getBestMove(bestMaxMove):
     calculationTimes.append(calculationTime)
     print('Average calculation time so far: ' + str(round(np.mean(calculationTimes), 2)) + ' seconds')
     print('Max calculation time so far: ' + str(round(np.max(calculationTimes), 2)) + ' seconds')
-    print('Min calculation time so far: ' + str(round(np.min(calculationTimes), 2)) + ' seconds\n')
+    print('Min calculation time so far: ' + str(round(np.min(calculationTimes), 2)) + ' seconds')
     print('Total calculation time so far: ' + str(round(np.sum(calculationTimes), 2)) + ' seconds\n')
 
     print('No. of evaluated moves: {0}'.format(nodesEvaluated))
@@ -230,17 +231,33 @@ def printPossibleMoves(bestMaxMove):
 
 # Wait for turn or make move
 while not gameState.isFinished():
-    while not gameState.isNextTurn():
+    while not gameState.isNextTurn() and not gameState.isFinished():
         messageHandler.receiveAndProcessMessages()
 
-    if gameState.isMyTurn():
-        print('It\'s my turn!\n')
-        # printAllPawns()
-        gameController.printBoard(gameState.getState())
-        oldField, newField = getBestMove(bestMaxMove)
-        printPossibleMoves(bestMaxMove)
-        bestMaxMove = [] # reset
-        nodesEvaluated = 0
-        messageDispatcher.sendMove(oldField, newField)
+    if not gameState.isFinished():
+        if gameState.isMyTurn():
+            print('It\'s my turn!\n')
+            # printAllPawns()
+            gameController.printBoard(gameState.getState())
+            oldField, newField = getBestMove(bestMaxMove)
+            printPossibleMoves(bestMaxMove)
+            bestMaxMove = [] # reset
+            nodesEvaluated = 0
+            messageDispatcher.sendMove(oldField, newField)
 
-    messageHandler.receiveAndProcessMessages()
+        messageHandler.receiveAndProcessMessages()
+
+# Game finished, write stats to file
+if len(calculationTimes) == len(allNodesEvaluated):
+    statsFileName = 'stats/' + str(datetime.datetime.now().isoformat()) + '_minmax_depth_' + str(MAX_DEPTH) + '_stats.csv'
+    with open(statsFileName, 'w+', newline='') as file:
+        writer = csv.writer(file, quoting = csv.QUOTE_NONNUMERIC)
+        for i in range(len(calculationTimes)):
+            writer.writerow([calculationTimes[i], allNodesEvaluated[i]])
+
+        file.close()
+
+    print('Game stats save to: ')
+    print(statsFileName)
+else:
+    print('Could not write game stats to file')

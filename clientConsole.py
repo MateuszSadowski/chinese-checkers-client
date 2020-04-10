@@ -104,19 +104,20 @@ def evaluatePossibleMove(move, playerId):
 
 # Wait for turn or make move
 while not gameState.isFinished():
-    while not gameState.isNextTurn():
+    while not gameState.isNextTurn() and not gameState.isFinished():
         messageHandler.receiveAndProcessMessages()
 
-    if gameState.isMyTurn():
-        print('It\'s my turn!\n')
-        # printAllPawns()
-        gameController.printBoard(gameState.getState())
-        printAllPossibleMoves()
-        # TODO: make it possible to quit game
-        print('Which pawn would you like to move?')
-        oldField = helper.getIntegersFromConsole()
-        print('Where would you like to move?')
-        newField = helper.getIntegersFromConsole()
-        messageDispatcher.sendMove(oldField, newField)
+    if not gameState.isFinished():
+        if gameState.isMyTurn():
+            print('It\'s my turn!\n')
+            # printAllPawns()
+            gameController.printBoard(gameState.getState())
+            printAllPossibleMoves()
+            # TODO: make it possible to quit game
+            print('Which pawn would you like to move?')
+            oldField = helper.getIntegersFromConsole()
+            print('Where would you like to move?')
+            newField = helper.getIntegersFromConsole()
+            messageDispatcher.sendMove(oldField, newField)
 
-    messageHandler.receiveAndProcessMessages()
+        messageHandler.receiveAndProcessMessages()

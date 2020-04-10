@@ -33,11 +33,11 @@ class SocketHandler:
 
     def receiveAndSplitMessages(self):
         response = self.socket.recv(RECV_LEN)
-        response = response.decode()
-        if response == '':
-            print('[INFO] Received an empty reponse\n')
-            time.sleep(EMPTY_RESPONSE_DELAY)
+        if not response:
+            print('[INFO] No response from server, check if game ID is correct\n')
+            self.close()
             return -1
+        response = response.decode()
         messages = response.split('\r\n')
         messages = helper.removeValuesFromList(messages, '')
         return messages
