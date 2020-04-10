@@ -43,6 +43,6 @@ class SocketHandler:
         return messages
 
     def send(self, msg):
-        print('[INFO] Sending: ' + msg + '\n')
+        # print('[INFO] Sending: ' + msg + '\n')
         time.sleep(SEND_DELAY)
         return self.socket.send(msg.encode())

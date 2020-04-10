@@ -15,8 +15,10 @@ import socketHandler
 import helper
 import constants as const
 
-print('Specify minmax search depth:\n')
+print('\nWelcome to Chinese Checkers!\n')
+print('Please, specify MinMax search depth (1 is random greedy):')
 MAX_DEPTH = helper.getIntegersFromConsole()
+print('')
 
 # Initialize game
 gameState = gameState.GameState()
@@ -39,9 +41,7 @@ messageHandler.receiveAndProcessMessages()
 bestMaxMove = []
 calculationTimes = []
 nodesEvaluated = 0
-sumNodesEvaluated = 0
-averageNodesEvaluated = 0
-mainLoopIterations = 0
+allNodesEvaluated = []
 
 def evaluate(state): # player 2 maximizes evaluation, player 1 minimizes evaluation
     currentPositions = state['pawns']
@@ -69,7 +69,7 @@ def evaluate(state): # player 2 maximizes evaluation, player 1 minimizes evaluat
             if gameOver(state, playerID):
                 endGame = -50
 
-    return (0.6 * (minPlayerVertDist - maxPlayerVertDist) + 0.4 * (minPlayerHorDist - maxPlayerHorDist)) + endGame
+    return 0.5 * (minPlayerVertDist - maxPlayerVertDist) + 0.5 * (minPlayerHorDist - maxPlayerHorDist) + endGame
 
 def gameOver(state,playerID):
     currentField = state['board']
@@ -192,13 +192,22 @@ def printAllPawns():
 def getBestMove(bestMaxMove):
     state = gameState.getState()
     
-    print('Calculating MinMax...')
+    print('Calculating MinMax...\n')
     startTime = time.time()
     minMax(state, MAX_DEPTH, -const.M_CONST, const.M_CONST, True)
     calculationTime = time.time() - startTime
     print('Calculated in: ' + str(round(calculationTime, 2)) + ' seconds')
     calculationTimes.append(calculationTime)
-    print('Average calculation time so far: ' + str(round(np.mean(calculationTimes), 2)) + ' seconds\n')
+    print('Average calculation time so far: ' + str(round(np.mean(calculationTimes), 2)) + ' seconds')
+    print('Max calculation time so far: ' + str(round(np.max(calculationTimes), 2)) + ' seconds')
+    print('Min calculation time so far: ' + str(round(np.min(calculationTimes), 2)) + ' seconds\n')
+
+    print('No. of evaluated moves: {0}'.format(nodesEvaluated))
+    allNodesEvaluated.append(nodesEvaluated)
+    # averageNodesEvaluated = sumNodesEvaluated / mainLoopIterations
+    print('Average no. of evaluated moves so far: {0}'.format(round(np.mean(allNodesEvaluated), 0)))
+    print('Max no. of evaluated moves so far: {0}'.format(np.max(allNodesEvaluated)))
+    print('Min no. of evaluated moves so far: {0}'.format(np.min(allNodesEvaluated)))
 
     if len(bestMaxMove) == 0:
         print('!!ERROR!! No possible moves for player: ' + str(gameController.getMyPlayerID(state)))
@@ -210,14 +219,15 @@ def getBestMove(bestMaxMove):
     return oldField, newField
 
 def printPossibleMoves(bestMaxMove):
+    print('')
     print('Current evaluation: {0}'.format(evaluate(gameState.getState())))
     print('Possible moves:')
     for move in bestMaxMove:
-        print('Pawn {0} to {1} evluated as {2}'.format(move[0], move[1], move[2]))
+        print('Pawn {0} to {1} evaluated as: {2}'.format(move[0], move[1], round(move[2], 2)))
+    print('')
 
 # Wait for turn or make move
 while not gameState.isFinished():
-    mainLoopIterations += 1
     while not gameState.isNextTurn():
         messageHandler.receiveAndProcessMessages()
 
@@ -226,13 +236,9 @@ while not gameState.isFinished():
         # printAllPawns()
         gameController.printBoard(gameState.getState())
         oldField, newField = getBestMove(bestMaxMove)
-        print('Evaluated {0} moves'.format(nodesEvaluated))
         printPossibleMoves(bestMaxMove)
         bestMaxMove = [] # reset
-        sumNodesEvaluated += nodesEvaluated
         nodesEvaluated = 0
-        averageNodesEvaluated = sumNodesEvaluated / mainLoopIterations
-        print('Average number of evaluated {0} moves so far'.format(averageNodesEvaluated))
         messageDispatcher.sendMove(oldField, newField)
 
     messageHandler.receiveAndProcessMessages()
