@@ -82,11 +82,17 @@ class MessageHandler:
 
     def handleResult(self, msgInfo):
         currentState = self.gameState.getState()
+        playerId = msgInfo['playerID']
+        myPlayerId = self.gameController.getMyPlayerID(currentState)
         print('==================================================')
-        print('<<RESULT>>')
-        print('Game ended with result: {0}'.format(msgInfo['result']))
-        if msgInfo['playerID'] != -1:
-            print('for player {0}'.format(msgInfo['playerID']))
-            print('after {0} moves'.format(currentState['totalMoves'][msgInfo['playerID']]))
-        print('==================================================')
-        newState = self.gameController.finishGame(currentState)
+        if playerId != -1:
+            if playerId == myPlayerId:
+                print('<<RESULT>> {0} after {1} moves'.format(msgInfo['result'], currentState['totalMoves'][msgInfo['playerID']]))
+                currentState = self.gameController.setWonGame(currentState)
+                newState = self.gameController.finishGame(currentState)
+                self.gameState.setState(newState)
+            else:
+                print('<<RESULT>> LOST after {0} moves'.format(currentState['totalMoves'][myPlayerId]))
+        else:
+            print('<<RESULT>> {0}'.format(msgInfo['result']))
+        print('==================================================\n')

@@ -10,7 +10,8 @@ class GameState:
             'totalMoves': {}, # total number of moves for each player
             'nextTurn': -1, # player id
             'lastTurn': -1, # player id 
-            'gameFinished': False
+            'gameFinished': False,
+            'gameWon': False
         }
 
     def getState(self):
@@ -27,3 +28,6 @@ class GameState:
 
     def isMyTurn(self):
         return self.state['nextTurn'] == self.state['player']['id']
+
+    def isWon(self):
+        return self.state['gameWon']

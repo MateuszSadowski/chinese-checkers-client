@@ -37,6 +37,11 @@ class GameController:
 
         return state
 
+    def setWonGame(self, state):
+        state['gameWon'] = True
+
+        return state
+
     # Getters
     def getMyPlayerID(self, state):
         return state['player']['id']

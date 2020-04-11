@@ -285,6 +285,10 @@ if len(calculationTimes) == len(allNodesEvaluated):
     helper.createDirs(statsFileName)
     with open(statsFileName, 'w+', newline='') as file:
         writer = csv.writer(file, quoting = csv.QUOTE_NONNUMERIC)
+        if gameState.isWon():
+            writer.writerow([1])
+        else:
+            writer.writerow([0])
         for i in range(len(calculationTimes)):
             writer.writerow([calculationTimes[i], allNodesEvaluated[i]])
 
