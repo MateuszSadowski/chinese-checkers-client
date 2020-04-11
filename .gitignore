@@ -42,3 +42,4 @@ nodeLanguageServer/**
 nodeLanguageServer.*/**
 .vscode
 *.csv
+*.txt
