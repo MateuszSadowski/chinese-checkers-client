@@ -11,23 +11,24 @@ reference = {
 }
 games = [
     {
-        'gameId': 40,
+        'gameId': 42,
         'testPlayer': {
             'depth': 2,
             'weight': 0.5,
-            'algorithm': 'Minmax'
+            'algorithm': 'MinmaxNoprun'
         },
         'refPlayer': reference
-    },
-        {
-        'gameId': 41,
-        'testPlayer': {
-            'depth': 1,
-            'weight': 0.7,
-            'algorithm': 'Minmax'
-        },
-        'refPlayer': reference
-    },
+    }
+    # ,
+    #     {
+    #     'gameId': 41,
+    #     'testPlayer': {
+    #         'depth': 1,
+    #         'weight': 0.7,
+    #         'algorithm': 'Minmax'
+    #     },
+    #     'refPlayer': reference
+    # },
 ]
 
 async def run(cmd, stdout, stderr):
