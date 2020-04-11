@@ -35,7 +35,7 @@ def main(argv):
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('clientMinmax.py -d <max-search-depth> -w <evaluation-weight> -g <game-id>')
+            print('clientMinmax.py -d <max-search-depth(int)>=3 -w <evaluation-weight(float)>=0.5 -g <game-id(int)>=0')
             sys.exit()
         elif opt in ("-d"):
             maxDepth = int(arg)
