@@ -1,5 +1,7 @@
 import string
 import random
+import os
+import errno
 
 def removeValuesFromList(theList, val):
    return [value for value in theList if value != val]
@@ -34,3 +36,11 @@ def maxes(a, key=None):
         elif k == m:
             max_list.append(s)
     return m, max_list
+
+def createDirs(filename):
+    if not os.path.exists(os.path.dirname(filename)):
+        try:
+            os.makedirs(os.path.dirname(filename))
+        except OSError as exc: # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise

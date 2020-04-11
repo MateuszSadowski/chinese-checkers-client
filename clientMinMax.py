@@ -31,7 +31,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv,"hd:w:g:")
     except getopt.GetoptError:
-        print('clientMinmax.py -d <max-search-depth>=3 -w <evaluation-weight>=0.5 -g <game-id>=0')
+        print('clientMinmax.py -d <max-search-depth(int)>=3 -w <evaluation-weight(float)>=0.5 -g <game-id(int)>=0')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
@@ -40,7 +40,7 @@ def main(argv):
         elif opt in ("-d"):
             maxDepth = int(arg)
         elif opt in ("-w"):
-            evalWeight = int(arg)
+            evalWeight = float(arg)
         elif opt in ("-g"):
             gameId = int(arg)
     print('Max search depth is: ' + str(maxDepth))
@@ -281,7 +281,8 @@ while not gameState.isFinished():
 
 # Game finished, write stats to file
 if len(calculationTimes) == len(allNodesEvaluated):
-    statsFileName = 'stats/' + str(datetime.datetime.now().isoformat()) + '_minmax_depth_' + str(maxDepth) + '_weight_' + str(evalWeight) + '_stats.csv'
+    statsFileName = 'stats/game-' + str(gameId) + "-" + str(datetime.datetime.now().isoformat()) + '-minmax-depth' + str(maxDepth) + '-weight' + str(evalWeight) + '-stats.csv'
+    helper.createDirs(statsFileName)
     with open(statsFileName, 'w+', newline='') as file:
         writer = csv.writer(file, quoting = csv.QUOTE_NONNUMERIC)
         for i in range(len(calculationTimes)):
