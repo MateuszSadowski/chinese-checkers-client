@@ -7,6 +7,8 @@ import datetime
 import copy
 import numpy as np
 import csv
+import sys
+import getopt
 
 import gameState
 import gameController
@@ -17,9 +19,37 @@ import helper
 import constants as const
 
 print('\nWelcome to Chinese Checkers!\n')
-print('Please, specify MinMax search depth (1 is random greedy):')
-MAX_DEPTH = helper.getIntegersFromConsole()
-print('')
+
+maxDepth = 3
+evalWeight = 0.5
+gameId = 0
+
+def main(argv):
+    global maxDepth
+    global evalWeight
+    global gameId
+    try:
+        opts, args = getopt.getopt(argv,"hd:w:g:")
+    except getopt.GetoptError:
+        print('clientMinmax.py -d <max-search-depth>=3 -w <evaluation-weight>=0.5 -g <game-id>=0')
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            print('clientMinmax.py -d <max-search-depth> -w <evaluation-weight> -g <game-id>')
+            sys.exit()
+        elif opt in ("-d"):
+            maxDepth = int(arg)
+        elif opt in ("-w"):
+            evalWeight = int(arg)
+        elif opt in ("-g"):
+            gameId = int(arg)
+    print('Max search depth is: ' + str(maxDepth))
+    print('Evaluation weight is: ' + str(evalWeight))
+    print('Game ID is: ' + str(gameId))
+    print('These parameters can be passed as command line arguments\n')
+
+if __name__ == "__main__":
+   main(sys.argv[1:])
 
 # Initialize game
 gameState = gameState.GameState()
@@ -31,12 +61,14 @@ messageDispatcher = messageDispatcher.MessageDispatcher(gameState, gameControlle
 # TODO: handle case when failed to connect
 username = helper.randomString()
 messageDispatcher.connect()
-messageDispatcher.login(username, const.GAME_ID)
+messageDispatcher.login(username, gameId)
 
-messageHandler.receiveAndProcessMessages()
+if not gameState.isFinished():
+    messageHandler.receiveAndProcessMessages()
 
-print('[INFO] Waiting for game to start...\n')
-messageHandler.receiveAndProcessMessages()
+if not gameState.isFinished():
+    print('[INFO] Waiting for game to start...\n')
+    messageHandler.receiveAndProcessMessages()
 
 # Strategy functions
 bestMaxMove = []
@@ -68,8 +100,8 @@ def evaluate(state): # player 2 maximizes evaluation, player 1 minimizes evaluat
 
     endGameMaxPlayer = gameOver(state, maxPlayer)
     endGameMinPlayer = gameOver(state, gameController.getOpponentID(state))
-    m = 0.5
-    E = 50
+    m = evalWeight
+    E = 50 # TODO: move to constants.py
     return m * (minPlayerVertDist - maxPlayerVertDist) + (1 - m) * (minPlayerHorDist - maxPlayerHorDist) + E * (endGameMaxPlayer - endGameMinPlayer)
 
 def gameOver(state,playerID):
@@ -121,7 +153,7 @@ def minMax(state,depth,alpha,beta,maximizingPlayersTurn): # MinMax algorithm
 
     # Evaluate first level
     # TODO: refactor
-    if depth == MAX_DEPTH and maximizingPlayersTurn:
+    if depth == maxDepth and maximizingPlayersTurn:
         sortedMoves = []
         for pawn,move in ((p,i) for p in possibleMoves for i in possibleMoves[p]):
             newState = copy.deepcopy(state)
@@ -140,7 +172,7 @@ def minMax(state,depth,alpha,beta,maximizingPlayersTurn): # MinMax algorithm
             evaluation = minMax(newState, depth - 1, alpha, beta, not maximizingPlayersTurn)
 
             if maximizingPlayersTurn:
-                if MAX_DEPTH == depth and evaluation >= bestEval:
+                if maxDepth == depth and evaluation >= bestEval:
                     bestMaxMove.append((pawn, move, evaluation))
 
             bestEval, alpha, beta = updateEvaluation(maximizingPlayersTurn, bestEval, evaluation, alpha, beta)
@@ -155,7 +187,7 @@ def minMax(state,depth,alpha,beta,maximizingPlayersTurn): # MinMax algorithm
             evaluation = minMax(newState, depth - 1, alpha, beta, not maximizingPlayersTurn)
 
             if maximizingPlayersTurn:
-                if MAX_DEPTH == depth and evaluation >= bestEval:
+                if maxDepth == depth and evaluation >= bestEval:
                     bestMaxMove.append((pawn, move, evaluation))
 
             bestEval, alpha, beta = updateEvaluation(maximizingPlayersTurn, bestEval, evaluation, alpha, beta)
@@ -170,7 +202,7 @@ def getRandomBestMove(bestMaxMove):
     
     print('Calculating MinMax...')
     startTime = time.time()
-    minMax(state, MAX_DEPTH, -const.M_CONST, const.M_CONST, True)
+    minMax(state, maxDepth, -const.M_CONST, const.M_CONST, True)
     calculationTime = time.time() - startTime
     print('Calculated in: ' + str(round(calculationTime, 2)) + ' seconds')
     calculationTimes.append(calculationTime)
@@ -195,7 +227,7 @@ def getBestMove(bestMaxMove):
     
     print('Calculating MinMax...\n')
     startTime = time.time()
-    minMax(state, MAX_DEPTH, -const.M_CONST, const.M_CONST, True)
+    minMax(state, maxDepth, -const.M_CONST, const.M_CONST, True)
     calculationTime = time.time() - startTime
     print('Calculated in: ' + str(round(calculationTime, 2)) + ' seconds')
     calculationTimes.append(calculationTime)
@@ -249,7 +281,7 @@ while not gameState.isFinished():
 
 # Game finished, write stats to file
 if len(calculationTimes) == len(allNodesEvaluated):
-    statsFileName = 'stats/' + str(datetime.datetime.now().isoformat()) + '_minmax_depth_' + str(MAX_DEPTH) + '_stats.csv'
+    statsFileName = 'stats/' + str(datetime.datetime.now().isoformat()) + '_minmax_depth_' + str(maxDepth) + '_weight_' + str(evalWeight) + '_stats.csv'
     with open(statsFileName, 'w+', newline='') as file:
         writer = csv.writer(file, quoting = csv.QUOTE_NONNUMERIC)
         for i in range(len(calculationTimes)):
@@ -257,7 +289,7 @@ if len(calculationTimes) == len(allNodesEvaluated):
 
         file.close()
 
-    print('Game stats save to: ')
+    print('Game stats saved to: ')
     print(statsFileName)
 else:
     print('Could not write game stats to file')
