@@ -118,10 +118,16 @@ def printAllPawns():
     for key, value in pawns.items():
         print('Player {0} has pawns in {1}'.format(key, value))
 
-def printAllPossibleMoves():
+def getPossibleMoves():
     state = gameState.getState()
     myPlayerID = gameController.getMyPlayerID(state)
     possibleMoves = gameController.allMoves(state, myPlayerID)
+
+    return possibleMoves
+
+def printAllPossibleMoves(possibleMoves):
+    state = gameState.getState()
+    myPlayerID = gameController.getMyPlayerID(state)
     if showMoveEvaluation:
         print('Current evaluation: {0}'.format(evaluate(state)))
     for key, value in possibleMoves.items():
@@ -132,11 +138,38 @@ def printAllPossibleMoves():
             else:
                 nextFields.append(newField)
         print('Pawn {0} can move to {1}'.format(key, nextFields))
+    print('')
 
 def evaluatePossibleMove(move, playerId):
     state = gameState.getState()
     newState = gameController.makeMove(state, move[0], move[1], playerId)
     return move[1], evaluate(newState)
+
+def validateMove(oldField, newField, possibleMoves):
+    try:
+        possibleNewFields = possibleMoves[str(oldField)]
+    except:
+        # key error
+        print('Invalid move. Cannot move pawn from field: {0}'.format(oldField))
+        print('Choose a valid move and try again.\n')
+        return False
+
+    if not (str(newField) in possibleNewFields):
+        print('Invalid move. Cannot move pawn: {0} to field: {1}'.format(oldField, newField))
+        print('Choose a valid move and try again.\n')
+        return False
+
+    return True
+
+
+def getMoveFromConsole():
+    print('Which pawn would you like to move?')
+    oldField = helper.getIntegersFromConsole()
+    print('Where would you like to move?')
+    newField = helper.getIntegersFromConsole()
+    print('')
+
+    return oldField, newField
 
 # Wait for turn or make move
 while not gameState.isFinished():
@@ -147,14 +180,12 @@ while not gameState.isFinished():
         if gameState.isMyTurn():
             print('It\'s my turn!\n')
             gameController.printBoard(gameState.getState())
+            possibleMoves = getPossibleMoves()
             if showPossibleMoves:
-                printAllPossibleMoves()
-            # TODO: make it possible to quit game
-            print('Which pawn would you like to move?')
-            oldField = helper.getIntegersFromConsole()
-            print('Where would you like to move?')
-            newField = helper.getIntegersFromConsole()
-            print('')
+                printAllPossibleMoves(possibleMoves)
+            oldField, newField = getMoveFromConsole()
+            while not validateMove(oldField, newField, possibleMoves):
+                oldField, newField = getMoveFromConsole()
             messageDispatcher.sendMove(oldField, newField)
 
         messageHandler.receiveAndProcessMessages()

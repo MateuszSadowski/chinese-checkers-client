@@ -2,6 +2,7 @@ import string
 import random
 import os
 import errno
+import sys
 
 def removeValuesFromList(theList, val):
    return [value for value in theList if value != val]
@@ -12,13 +13,17 @@ def randomString(stringLength=10):
     return ''.join(random.choice(letters) for i in range(stringLength))
 
 def getIntegersFromConsole():
-   value = -1
-   while value == -1:
-    try:
-        value = int(input())
-    except:
-        print('Invalid game ID. Please input only integers')
-   return value
+    print('(To quit the game type -1)')
+    value = None
+    while not value:
+        try:
+            value = int(input())
+        except:
+            print('Invalid game ID. Please input only integers')
+    if value == -1:
+        print('\nQuitting game.\n')
+        sys.exit(3)
+    return value
 
 def mergeDicts(dict1, dict2):
     merged = dict1.copy()   # start with x's keys and values
