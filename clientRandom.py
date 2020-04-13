@@ -4,6 +4,8 @@ import random
 import string
 import time
 import datetime
+import sys
+import getopt
 
 import gameState
 import gameController
@@ -12,6 +14,29 @@ import messageHandler
 import socketHandler
 import helper
 import constants as const
+
+print('\nWelcome to Chinese Checkers!\n')
+
+gameId = 0
+
+def main(argv):
+    global gameId
+    try:
+        opts, args = getopt.getopt(argv,"hg:")
+    except getopt.GetoptError:
+        print('clientRandom.py -g <game-id(int)>')
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            print('clientRandom.py -g <game-id(int)>')
+            sys.exit()
+        elif opt in ("-g"):
+            gameId = int(arg)
+    print('Game ID is: ' + str(gameId))
+    print('This parameter can be passed as command line argument\n')
+
+if __name__ == "__main__":
+   main(sys.argv[1:])
 
 # Initialize game
 gameState = gameState.GameState()
@@ -23,7 +48,7 @@ messageDispatcher = messageDispatcher.MessageDispatcher(gameState, gameControlle
 # TODO: handle case when failed to connect
 username = helper.randomString()
 messageDispatcher.connect()
-messageDispatcher.login(username, const.GAME_ID)
+messageDispatcher.login(username, gameId)
 
 messageHandler.receiveAndProcessMessages()
 

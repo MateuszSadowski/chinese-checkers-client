@@ -4,6 +4,8 @@ import random
 import string
 import time
 import datetime
+import sys
+import getopt
 
 import gameState
 import gameController
@@ -13,10 +15,28 @@ import socketHandler
 import helper
 import constants as const
 
-print('Welcome to ChineseCheckers!')
-# print('What is the ID of the game you want to connect to?')
-# gameId = helper.getIntegersFromConsole()
-gameId = const.GAME_ID
+print('\nWelcome to Chinese Checkers!\n')
+
+gameId = 0
+
+def main(argv):
+    global gameId
+    try:
+        opts, args = getopt.getopt(argv,"hg:")
+    except getopt.GetoptError:
+        print('clientConsole.py -g <game-id(int)>')
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            print('clientConsole.py -g <game-id(int)>')
+            sys.exit()
+        elif opt in ("-g"):
+            gameId = int(arg)
+    print('Game ID is: ' + str(gameId))
+    print('This parameter can be passed as command line argument\n')
+
+if __name__ == "__main__":
+   main(sys.argv[1:])
 
 # Initialize game
 gameState = gameState.GameState()
