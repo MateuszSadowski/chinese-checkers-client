@@ -84,12 +84,12 @@ for game in games:
     async def runGames():
         print('Running {0} depth: {1}, weight: {2}, alpha-beta: {4} on gameId {3}...'.format(testAlgorithm, testMaxDepth, testEvalWeight, gameId, testPruning))
         print('Running {0} depth: {1}, weight: {2}, alpha-beta: {4} on gameId {3}...\n'.format(refAlgorithm, refMaxDepth, refEvalWeight, gameId, refPruning))
-        testCmd = ["python3", "client" + testAlgorithm + ".py", "-d " + str(testMaxDepth), "-w " + str(testEvalWeight), "-g " + str(gameId)]
-        refCmd = ["python3", "client" + refAlgorithm + ".py", "-d " + str(refMaxDepth), "-w " + str(refEvalWeight), "-g " + str(gameId)]
+        testCmd = ['python3', 'client' + testAlgorithm + '.py', '-d ' + str(testMaxDepth), '-w ' + str(testEvalWeight), '-g ' + str(gameId)]
+        refCmd = ['python3', 'client' + refAlgorithm + '.py', '-d ' + str(refMaxDepth), '-w ' + str(refEvalWeight), '-g ' + str(gameId)]
         if not testPruning:
-            testCmd.append("--no-pruning")
+            testCmd.append('--no-pruning')
         if not refPruning:
-            refCmd.append("--no-pruning")
+            refCmd.append('--no-pruning')
 
         await asyncio.gather(
             run(testCmd, testStdoutFile, asyncio.subprocess.STDOUT),

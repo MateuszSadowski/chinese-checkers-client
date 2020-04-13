@@ -31,7 +31,7 @@ def main(argv):
     global gameId
     global pruning
     try:
-        opts, args = getopt.getopt(argv,"hd:w:g:", ['no-pruning'])
+        opts, args = getopt.getopt(argv,'hd:w:g:', ['no-pruning'])
     except getopt.GetoptError:
         print('clientMinmax.py -d <max-search-depth(int)> -w <evaluation-weight(float)> -g <game-id(int)>')
         print('--no-pruning - switch off alpha-beta pruning')
@@ -41,14 +41,14 @@ def main(argv):
             print('clientMinmax.py -d <max-search-depth(int)> -w <evaluation-weight(float)> -g <game-id(int)>')
             print('--no-pruning - switch off alpha-beta pruning')
             sys.exit()
-        elif opt in ("-d"):
+        elif opt in ('-d'):
             if int(arg) < 1:
                 print('Depth should be an integer greater or equal 1.')
                 sys.exit(2)
             maxDepth = int(arg)
-        elif opt in ("-w"):
+        elif opt in ('-w'):
             evalWeight = float(arg)
-        elif opt in ("-g"):
+        elif opt in ('-g'):
             gameId = int(arg)
         elif opt in ('--no-pruning'):
             pruning = False
@@ -58,7 +58,7 @@ def main(argv):
     print('Alpha-beta: ' + str(pruning))
     print('These parameters can be passed as command line arguments\n')
 
-if __name__ == "__main__":
+if __name__ == '__main__':
    main(sys.argv[1:])
 
 # Initialize game
@@ -117,14 +117,14 @@ def gameOver(state,playerID):
     currentField = state['board']
     players = state['players']
     for player in players:
-        if player["id"] == playerID:
+        if player['id'] == playerID:
             count = int(0) 
             playerInGoalState = False
-            for key in player["goalFields"]:
-                if currentField[key]["player"] != None:
+            for key in player['goalFields']:
+                if currentField[key]['player'] != None:
                     count += 1
                 
-                if currentField[key]["player"] == playerID:
+                if currentField[key]['player'] == playerID:
                     playerInGoalState = True
     
     return count == 10 and playerInGoalState
@@ -289,7 +289,7 @@ while not gameState.isFinished():
 
 # Game finished, write stats to file
 if len(calculationTimes) == len(allNodesEvaluated):
-    statsFileName = 'stats/game-' + str(gameId) + "-" + str(datetime.datetime.now().isoformat()) + '-minmax-depth' + str(maxDepth) + '-weight' + str(evalWeight) + '-stats.csv'
+    statsFileName = 'stats/game-' + str(gameId) + '-' + str(datetime.datetime.now().isoformat()) + '-minmax-depth' + str(maxDepth) + '-weight' + str(evalWeight) + '-stats.csv'
     helper.createDirs(statsFileName)
     with open(statsFileName, 'w+', newline='') as file:
         writer = csv.writer(file, quoting = csv.QUOTE_NONNUMERIC)

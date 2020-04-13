@@ -26,7 +26,7 @@ def main(argv):
     global showPossibleMoves
     global showMoveEvaluation
     try:
-        opts, args = getopt.getopt(argv,"hg:", ['show-moves','show-eval'])
+        opts, args = getopt.getopt(argv,'hg:', ['show-moves','show-eval'])
     except getopt.GetoptError:
         print('clientConsole.py -g <game-id(int)>')
         print('--show-moves - print all legal moves for player')
@@ -38,7 +38,7 @@ def main(argv):
             print('--show-moves - print all legal moves for player')
             print('--show-eval - calculate and print evaluation for all legal moves (requires --show-moves to have an effect)')
             sys.exit()
-        elif opt in ("-g"):
+        elif opt in ('-g'):
             gameId = int(arg)
         elif opt in ('--show-moves'):
             showPossibleMoves = True
@@ -47,7 +47,7 @@ def main(argv):
     print('Game ID is: ' + str(gameId))
     print('This parameter can be passed as command line argument\n')
 
-if __name__ == "__main__":
+if __name__ == '__main__':
    main(sys.argv[1:])
 
 # Initialize game
@@ -99,14 +99,14 @@ def gameOver(state,playerID):
     currentField = state['board']
     players = state['players']
     for player in players:
-        if player["id"] == playerID:
+        if player['id'] == playerID:
             count = int(0) 
             playerInGoalState = False
-            for key in player["goalFields"]:
-                if currentField[key]["player"] != None:
+            for key in player['goalFields']:
+                if currentField[key]['player'] != None:
                     count += 1
                 
-                if currentField[key]["player"] == playerID:
+                if currentField[key]['player'] == playerID:
                     playerInGoalState = True
     
     return count == 10 and playerInGoalState

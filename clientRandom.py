@@ -22,7 +22,7 @@ gameId = 0
 def main(argv):
     global gameId
     try:
-        opts, args = getopt.getopt(argv,"hg:")
+        opts, args = getopt.getopt(argv,'hg:')
     except getopt.GetoptError:
         print('clientRandom.py -g <game-id(int)>')
         sys.exit(2)
@@ -30,12 +30,12 @@ def main(argv):
         if opt == '-h':
             print('clientRandom.py -g <game-id(int)>')
             sys.exit()
-        elif opt in ("-g"):
+        elif opt in ('-g'):
             gameId = int(arg)
     print('Game ID is: ' + str(gameId))
     print('This parameter can be passed as command line argument\n')
 
-if __name__ == "__main__":
+if __name__ == '__main__':
    main(sys.argv[1:])
 
 # Initialize game
