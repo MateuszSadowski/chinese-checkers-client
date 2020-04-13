@@ -7,28 +7,40 @@ import helper
 reference = {
     'depth': 1,
     'weight': 0.5,
+    'pruning': True,
     'algorithm': 'Minmax'
 }
 games = [
     {
-        'gameId': 42,
+        'gameId': 8,
         'testPlayer': {
-            'depth': 2,
-            'weight': 0.5,
-            'algorithm': 'MinmaxNoprun'
+            'depth': 3,
+            'weight': 0.6,
+            'pruning': False,
+            'algorithm': 'Minmax'
+        },
+        'refPlayer': reference
+    },
+    {
+        'gameId': 9,
+        'testPlayer': {
+            'depth': 3,
+            'weight': 0.6,
+            'pruning': True,
+            'algorithm': 'Minmax'
+        },
+        'refPlayer': reference
+    },
+    {
+        'gameId': 10,
+        'testPlayer': {
+            'depth': 3,
+            'weight': 0.6,
+            'pruning': True,
+            'algorithm': 'Minmax'
         },
         'refPlayer': reference
     }
-    # ,
-    #     {
-    #     'gameId': 41,
-    #     'testPlayer': {
-    #         'depth': 1,
-    #         'weight': 0.7,
-    #         'algorithm': 'Minmax'
-    #     },
-    #     'refPlayer': reference
-    # },
 ]
 
 async def run(cmd, stdout, stderr):
@@ -52,10 +64,12 @@ for game in games:
     testMaxDepth = game['testPlayer']['depth']
     testEvalWeight = game['testPlayer']['weight']
     testAlgorithm = game['testPlayer']['algorithm']
+    testPruning = game['testPlayer']['pruning']
 
     refMaxDepth = game['refPlayer']['depth']
     refEvalWeight = game['refPlayer']['weight']
     refAlgorithm = game['refPlayer']['algorithm']
+    refPruning = game['refPlayer']['pruning']
 
     gameFolder = 'stats/{0}-game-{1}-{2}-depth{3}-weight{4}-vs-{5}-depth{6}-weight{7}'.format(gameId, datetime.datetime.now().isoformat(), testAlgorithm, testMaxDepth, testEvalWeight, refAlgorithm, refMaxDepth, refEvalWeight)
 
@@ -68,10 +82,15 @@ for game in games:
     refStdoutFile = open(refStdoutFileName, 'w+', newline='')
 
     async def runGames():
-        print('Running {0} depth {1} weight {2} on gameId {3}...'.format(testAlgorithm, testMaxDepth, testEvalWeight, gameId))
-        print('Running {0} depth {1} weight {2} on gameId {3}...\n'.format(refAlgorithm, refMaxDepth, refEvalWeight, gameId))
+        print('Running {0} depth: {1}, weight: {2}, alpha-beta: {4} on gameId {3}...'.format(testAlgorithm, testMaxDepth, testEvalWeight, gameId, testPruning))
+        print('Running {0} depth: {1}, weight: {2}, alpha-beta: {4} on gameId {3}...\n'.format(refAlgorithm, refMaxDepth, refEvalWeight, gameId, refPruning))
         testCmd = ["python3", "client" + testAlgorithm + ".py", "-d " + str(testMaxDepth), "-w " + str(testEvalWeight), "-g " + str(gameId)]
         refCmd = ["python3", "client" + refAlgorithm + ".py", "-d " + str(refMaxDepth), "-w " + str(refEvalWeight), "-g " + str(gameId)]
+        if not testPruning:
+            testCmd.append("--no-pruning")
+        if not refPruning:
+            refCmd.append("--no-pruning")
+
         await asyncio.gather(
             run(testCmd, testStdoutFile, asyncio.subprocess.STDOUT),
             run(refCmd, refStdoutFile, asyncio.subprocess.STDOUT) 

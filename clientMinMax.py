@@ -23,19 +23,23 @@ print('\nWelcome to Chinese Checkers!\n')
 maxDepth = 3
 evalWeight = 0.5
 gameId = 0
+pruning = True
 
 def main(argv):
     global maxDepth
     global evalWeight
     global gameId
+    global pruning
     try:
-        opts, args = getopt.getopt(argv,"hd:w:g:")
+        opts, args = getopt.getopt(argv,"hd:w:g:", ['no-pruning'])
     except getopt.GetoptError:
-        print('clientMinmax.py -d <max-search-depth(int)>=3 -w <evaluation-weight(float)>=0.5 -g <game-id(int)>=0')
+        print('clientMinmax.py -d <max-search-depth(int)> -w <evaluation-weight(float)> -g <game-id(int)>')
+        print('--no-pruning - switch off alpha-beta pruning')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('clientMinmax.py -d <max-search-depth(int)>=3 -w <evaluation-weight(float)>=0.5 -g <game-id(int)>=0')
+            print('clientMinmax.py -d <max-search-depth(int)> -w <evaluation-weight(float)> -g <game-id(int)>')
+            print('--no-pruning - switch off alpha-beta pruning')
             sys.exit()
         elif opt in ("-d"):
             maxDepth = int(arg)
@@ -43,9 +47,12 @@ def main(argv):
             evalWeight = float(arg)
         elif opt in ("-g"):
             gameId = int(arg)
+        elif opt in ('--no-pruning'):
+            pruning = False
+    print('Game ID is: ' + str(gameId))
     print('Max search depth is: ' + str(maxDepth))
     print('Evaluation weight is: ' + str(evalWeight))
-    print('Game ID is: ' + str(gameId))
+    print('Alpha-beta: ' + str(pruning))
     print('These parameters can be passed as command line arguments\n')
 
 if __name__ == "__main__":
@@ -177,7 +184,7 @@ def minMax(state,depth,alpha,beta,maximizingPlayersTurn): # MinMax algorithm
 
             bestEval, alpha, beta = updateEvaluation(maximizingPlayersTurn, bestEval, evaluation, alpha, beta)
 
-            if beta < alpha:
+            if pruning and beta < alpha:
                 break
     else:
         for pawn,move in ((p,i) for p in possibleMoves for i in possibleMoves[p]):
@@ -192,7 +199,7 @@ def minMax(state,depth,alpha,beta,maximizingPlayersTurn): # MinMax algorithm
 
             bestEval, alpha, beta = updateEvaluation(maximizingPlayersTurn, bestEval, evaluation, alpha, beta)
 
-            if beta < alpha:
+            if pruning and beta < alpha:
                 break
 
     return bestEval
