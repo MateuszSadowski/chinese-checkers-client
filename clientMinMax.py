@@ -42,6 +42,9 @@ def main(argv):
             print('--no-pruning - switch off alpha-beta pruning')
             sys.exit()
         elif opt in ("-d"):
+            if int(arg) < 1:
+                print('Depth should be an integer greater or equal 1.')
+                sys.exit(2)
             maxDepth = int(arg)
         elif opt in ("-w"):
             evalWeight = float(arg)
