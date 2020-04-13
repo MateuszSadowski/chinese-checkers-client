@@ -1,11 +1,12 @@
 # Connection
 PORT = 8080
 IP = 'localhost'
-GAME_ID = 58
+GAME_ID = 0
 
 # Minmax
 M_CONST = 10*10
 MAX_DEPTH = 3
+E_CONST = 50
 VERT_POS = [5,5,5,5,5,
                     6,6,6,6,6,6,
                     7,7,7,7,7,7,7,

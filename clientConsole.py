@@ -93,8 +93,7 @@ def evaluate(state): # player 2 maximizes evaluation, player 1 minimizes evaluat
     endGameMaxPlayer = gameOver(state, maxPlayer)
     endGameMinPlayer = gameOver(state, gameController.getOpponentID(state))
     m = 0.5
-    E = 50
-    return m * (minPlayerVertDist - maxPlayerVertDist) + (1 - m) * (minPlayerHorDist - maxPlayerHorDist) + E * (endGameMaxPlayer - endGameMinPlayer)
+    return m * (minPlayerVertDist - maxPlayerVertDist) + (1 - m) * (minPlayerHorDist - maxPlayerHorDist) + const.E_CONST* (endGameMaxPlayer - endGameMinPlayer)
 
 def gameOver(state,playerID):
     currentField = state['board']
