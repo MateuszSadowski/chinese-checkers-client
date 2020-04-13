@@ -21,7 +21,7 @@ def getIntegersFromConsole():
         except:
             print('Invalid game ID. Please input only integers')
     if value == -1:
-        print('\nQuitting game.\n')
+        print('\nQuitting game.')
         sys.exit(3)
     return value
 

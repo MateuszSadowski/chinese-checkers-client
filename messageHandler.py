@@ -1,7 +1,13 @@
 import json
+import time
 
 import gameState
 import helper
+
+MOVE_DELAY = 2
+TURN_DELAY = 2
+INIT_DELAY = 2
+BOARD_DELAY = 1
 
 class MessageHandler:
     def __init__(self, gameState, gameController, socketHandler):
@@ -55,14 +61,18 @@ class MessageHandler:
             currentState['totalMoves'][playerId] = 0
         currentState['players'] = sessionInfo['players']
         newState = self.gameController.initializeState(currentState)
-        self.gameState.setState(newState)
         print('[INFO] Game starts!\n')
+        time.sleep(INIT_DELAY)
+        self.gameController.printBoard(newState)
+        time.sleep(BOARD_DELAY)
+        self.gameState.setState(newState)
 
     def handleTurn(self, msgInfo):
         currentState = self.gameState.getState()
         newState = self.gameController.nextTurn(currentState, msgInfo['playerID'])
         self.gameState.setState(newState)
         print('((TURN)) Turn of player with id: {0}\n'.format(newState['nextTurn']))
+        time.sleep(TURN_DELAY)
 
     def handleInfo(self, msgInfo):
         currentState = self.gameState.getState()
@@ -75,6 +85,9 @@ class MessageHandler:
         newState = self.gameController.incrementTotalMoves(newState, playerId)
         totalPlayerMoves = newState['totalMoves'][playerId]
         print('==MOVE-{3}==> Player {0} made a move from {1} to {2}\n'.format(playerId, oldField, newField, totalPlayerMoves))
+        time.sleep(MOVE_DELAY)
+        self.gameController.printBoard(newState)
+        time.sleep(BOARD_DELAY)
         self.gameState.setState(newState)
 
     def handleError(self, msgInfo):

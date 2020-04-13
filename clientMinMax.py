@@ -280,7 +280,6 @@ while not gameState.isFinished():
         if gameState.isMyTurn():
             print('It\'s my turn!\n')
             # printAllPawns()
-            gameController.printBoard(gameState.getState())
             oldField, newField = getBestMove(bestMaxMove)
             printPossibleMoves(bestMaxMove)
             bestMaxMove = [] # reset

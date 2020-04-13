@@ -179,7 +179,6 @@ while not gameState.isFinished():
     if not gameState.isFinished():
         if gameState.isMyTurn():
             print('It\'s my turn!\n')
-            gameController.printBoard(gameState.getState())
             possibleMoves = getPossibleMoves()
             if showPossibleMoves:
                 printAllPossibleMoves(possibleMoves)

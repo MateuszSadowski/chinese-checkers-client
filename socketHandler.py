@@ -4,7 +4,7 @@ import socket
 
 RECV_LEN = 10000000
 
-SEND_DELAY = 3
+SEND_DELAY = 1
 EMPTY_RESPONSE_DELAY = 1
 
 class SocketHandler:
@@ -32,7 +32,11 @@ class SocketHandler:
             print('!!ERROR!! Socket failed to close with error {0}\n'.format(err))
 
     def receiveAndSplitMessages(self):
-        response = self.socket.recv(RECV_LEN)
+        response = None
+        try:
+            response = self.socket.recv(RECV_LEN)
+        except:
+            print('Could not read from socket.\n')
         if not response:
             print('[INFO] No response from server, check if game ID is correct\n')
             self.close()
