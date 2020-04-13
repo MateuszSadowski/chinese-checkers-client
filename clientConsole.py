@@ -18,20 +18,32 @@ import constants as const
 print('\nWelcome to Chinese Checkers!\n')
 
 gameId = 0
+showPossibleMoves = False
+showMoveEvaluation = False
 
 def main(argv):
     global gameId
+    global showPossibleMoves
+    global showMoveEvaluation
     try:
-        opts, args = getopt.getopt(argv,"hg:")
+        opts, args = getopt.getopt(argv,"hg:", ['show-moves','show-eval'])
     except getopt.GetoptError:
         print('clientConsole.py -g <game-id(int)>')
+        print('--show-moves - print all legal moves for player')
+        print('--show-eval - calculate and print evaluation for all legal moves (requires --show-moves to have an effect)')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
             print('clientConsole.py -g <game-id(int)>')
+            print('--show-moves - print all legal moves for player')
+            print('--show-eval - calculate and print evaluation for all legal moves (requires --show-moves to have an effect)')
             sys.exit()
         elif opt in ("-g"):
             gameId = int(arg)
+        elif opt in ('--show-moves'):
+            showPossibleMoves = True
+        elif opt in ('--show-eval'):
+            showMoveEvaluation = True
     print('Game ID is: ' + str(gameId))
     print('This parameter can be passed as command line argument\n')
 
@@ -110,11 +122,15 @@ def printAllPossibleMoves():
     state = gameState.getState()
     myPlayerID = gameController.getMyPlayerID(state)
     possibleMoves = gameController.allMoves(state, myPlayerID)
-    print('Current evaluation: {0}'.format(evaluate(state)))
+    if showMoveEvaluation:
+        print('Current evaluation: {0}'.format(evaluate(state)))
     for key, value in possibleMoves.items():
         nextFields = []
         for newField in value:
-            nextFields.append(evaluatePossibleMove((key, newField), myPlayerID))
+            if showMoveEvaluation:
+                nextFields.append(evaluatePossibleMove((key, newField), myPlayerID))
+            else:
+                nextFields.append(newField)
         print('Pawn {0} can move to {1}'.format(key, nextFields))
 
 def evaluatePossibleMove(move, playerId):
@@ -130,14 +146,15 @@ while not gameState.isFinished():
     if not gameState.isFinished():
         if gameState.isMyTurn():
             print('It\'s my turn!\n')
-            # printAllPawns()
             gameController.printBoard(gameState.getState())
-            printAllPossibleMoves()
+            if showPossibleMoves:
+                printAllPossibleMoves()
             # TODO: make it possible to quit game
             print('Which pawn would you like to move?')
             oldField = helper.getIntegersFromConsole()
             print('Where would you like to move?')
             newField = helper.getIntegersFromConsole()
+            print('')
             messageDispatcher.sendMove(oldField, newField)
 
         messageHandler.receiveAndProcessMessages()
